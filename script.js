@@ -800,21 +800,26 @@ function initAudio() {
 function createAmbientSound() {
   if (!audioContext || soundEnabled) return;
   
-  // Create multiple oscillators for space ambient sound with better frequencies
-  const frequencies = [40, 60, 90, 150, 240];
+  // Create multiple oscillators for space ambient sound with smoother frequencies
+  const frequencies = [30, 45, 70, 110, 180];
   
-  frequencies.forEach(freq => {
+  frequencies.forEach((freq, index) => {
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
     
-    oscillator.type = 'sine';
+    // Use triangle waves for smoother sound
+    oscillator.type = 'triangle';
     oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
     
-    // Random phase for each oscillator
-    oscillator.phase = Math.random() * Math.PI * 2;
+    // Add slight frequency drift for more organic sound
+    oscillator.frequency.linearRampToValueAtTime(freq + (Math.random() - 0.5) * 2, audioContext.currentTime + 5);
     
-    // Increased volume for better ambient effect
-    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+    // Lower volume for smoother ambient effect
+    gainNode.gain.setValueAtTime(0.03, audioContext.currentTime);
+    
+    // Add subtle gain modulation
+    gainNode.gain.linearRampToValueAtTime(0.04, audioContext.currentTime + 3);
+    gainNode.gain.linearRampToValueAtTime(0.03, audioContext.currentTime + 6);
     
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
