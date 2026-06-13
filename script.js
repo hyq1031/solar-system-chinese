@@ -317,41 +317,50 @@ function createProceduralTexture(baseColor, planetName) {
 
 function createSun() {
   // 太阳核心 | Sun Core
-  const geometry = new THREE.SphereGeometry(2, 64, 64);
+  const geometry = new THREE.SphereGeometry(1.2, 64, 64);
   const material = new THREE.MeshBasicMaterial({ 
-    color: 0xffaa00,
-    emissive: 0xffaa00
+    color: 0xffdd44,
+    emissive: 0xffdd44
   });
   sun = new THREE.Mesh(geometry, material);
   scene.add(sun);
   
   // 太阳光晕层 | Sun Glow Layers
-  const glow1Geometry = new THREE.SphereGeometry(2.3, 64, 64);
+  const glow1Geometry = new THREE.SphereGeometry(1.4, 64, 64);
   const glow1Material = new THREE.MeshBasicMaterial({
-    color: 0xff8800,
+    color: 0xffaa22,
     transparent: true,
-    opacity: 0.4
+    opacity: 0.5
   });
   const glow1 = new THREE.Mesh(glow1Geometry, glow1Material);
   sun.add(glow1);
   
-  const glow2Geometry = new THREE.SphereGeometry(2.6, 64, 64);
+  const glow2Geometry = new THREE.SphereGeometry(1.6, 64, 64);
   const glow2Material = new THREE.MeshBasicMaterial({
-    color: 0xff6600,
+    color: 0xff8800,
     transparent: true,
-    opacity: 0.2
+    opacity: 0.3
   });
   const glow2 = new THREE.Mesh(glow2Geometry, glow2Material);
   sun.add(glow2);
   
-  const glow3Geometry = new THREE.SphereGeometry(3.0, 64, 64);
+  const glow3Geometry = new THREE.SphereGeometry(1.9, 64, 64);
   const glow3Material = new THREE.MeshBasicMaterial({
-    color: 0xff4400,
+    color: 0xff6600,
     transparent: true,
-    opacity: 0.1
+    opacity: 0.15
   });
   const glow3 = new THREE.Mesh(glow3Geometry, glow3Material);
   sun.add(glow3);
+  
+  const glow4Geometry = new THREE.SphereGeometry(2.3, 64, 64);
+  const glow4Material = new THREE.MeshBasicMaterial({
+    color: 0xff4400,
+    transparent: true,
+    opacity: 0.08
+  });
+  const glow4 = new THREE.Mesh(glow4Geometry, glow4Material);
+  sun.add(glow4);
 }
 
 function createPlanets() {
@@ -852,7 +861,7 @@ function animate() {
     const data = planet.userData;
     
     // 公转 | Revolution
-    const orbitalSpeed = (2 * Math.PI) / (data.orbitalPeriod * 0.01) * speed;
+    const orbitalSpeed = (2 * Math.PI) / (data.orbitalPeriod * 0.01) * (speed * 0.1);
     data.angle += orbitalSpeed * 0.01;
     
     planet.position.x = Math.cos(data.angle) * data.scaledDistance;
