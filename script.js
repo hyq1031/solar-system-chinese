@@ -327,6 +327,22 @@ function createSun() {
     emissive: 0xffdd44
   });
   sun = new THREE.Mesh(geometry, material);
+  sun.castShadow = false;
+  sun.receiveShadow = false;
+  sun.userData = {
+    name: '太阳 | Sun',
+    nameCN: '太阳',
+    nameEN: 'Sun',
+    description: '太阳是太阳系的中心，是一颗G型主序星，占太阳系总质量的99.86%。',
+    descriptionEN: 'The Sun is the center of the Solar System, a G-type main-sequence star that comprises 99.86% of the total mass of the Solar System.',
+    diameter: '1,392,700 km',
+    age: '4.6 billion years',
+    surfaceTemp: '5,500°C',
+    coreTemp: '15 million °C',
+    type: 'G-type Main Sequence Star',
+    mass: '1.989 × 10³⁰ kg',
+    lightToEarth: '8 minutes 20 seconds'
+  };
   scene.add(sun);
   
   // 太阳光晕层 | Sun Glow Layers
@@ -678,6 +694,14 @@ function onMouseClick(event) {
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, camera);
   
+  // Check if sun is clicked
+  const sunIntersects = raycaster.intersectObject(sun, true);
+  if (sunIntersects.length > 0) {
+    console.log('Sun clicked');
+    showPlanetInfo(sun.userData);
+    return;
+  }
+  
   const intersects = raycaster.intersectObjects(planets, true);
   
   console.log('Click detected, intersects:', intersects.length);
@@ -728,6 +752,27 @@ function setupControls() {
     if (grandTourMode) {
       grandTourIndex = 0;
       focusOnPlanet(grandTourIndex);
+    } else {
+      // Reset camera to default top-down view
+      const startPosition = camera.position.clone();
+      const endPosition = new THREE.Vector3(0, 80, 0);
+      
+      let progress = 0;
+      function animateCameraReset() {
+        progress += 0.05;
+        if (progress >= 1) {
+          camera.position.copy(endPosition);
+          camera.lookAt(0, 0, 0);
+          hidePlanetInfo();
+          return;
+        }
+        
+        camera.position.lerpVectors(startPosition, endPosition, progress);
+        camera.lookAt(0, 0, 0);
+        requestAnimationFrame(animateCameraReset);
+      }
+      
+      animateCameraReset();
     }
   });
   
