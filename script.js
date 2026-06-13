@@ -290,8 +290,8 @@ function createPlanets() {
       metalness: 0.2
     });
     const planet = new THREE.Mesh(geometry, material);
-    planet.castShadow = true;
-    planet.receiveShadow = true;
+    planet.castShadow = false;
+    planet.receiveShadow = false;
     
     // 缩放距离用于可视化 | Scale distance for visualization
     const scaledDistance = data.distance * 2;
@@ -326,19 +326,25 @@ function createPlanetLabel(planet, name) {
   canvas.width = 256;
   canvas.height = 64;
   
-  context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  context.fillStyle = 'rgba(0, 0, 0, 0.5)';
   context.fillRect(0, 0, 256, 64);
   
-  context.font = 'bold 24px Arial';
+  context.font = 'bold 28px Arial';
   context.fillStyle = 'white';
   context.textAlign = 'center';
-  context.fillText(name, 128, 40);
+  context.textBaseline = 'middle';
+  context.fillText(name, 128, 32);
   
   const texture = new THREE.CanvasTexture(canvas);
-  const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const spriteMaterial = new THREE.SpriteMaterial({ 
+    map: texture, 
+    transparent: true,
+    depthTest: false,
+    depthWrite: false
+  });
   const sprite = new THREE.Sprite(spriteMaterial);
   sprite.scale.set(4, 1, 1);
-  sprite.position.set(0, planet.userData.radius + 1, 0);
+  sprite.position.set(0, planet.userData.radius + 2, 0);
   
   planet.add(sprite);
   labelSprites.push(sprite);
@@ -588,6 +594,9 @@ function setupControls() {
     showLabels = !showLabels;
     labelSprites.forEach(sprite => sprite.visible = showLabels);
   });
+  
+  // Ensure labels are visible by default
+  labelSprites.forEach(sprite => sprite.visible = showLabels);
   
   // 旅行者号切换 | Toggle Voyagers
   document.getElementById('toggle-voyagers').addEventListener('click', () => {
