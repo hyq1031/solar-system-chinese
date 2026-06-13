@@ -529,20 +529,33 @@ function createTransferOrbits() {
   const mars = planets.find(p => p.userData.nameCN === '火星');
   
   if (earth && mars) {
-    const transferCurve = new THREE.EllipseCurve(
-      0, 0,
-      earth.userData.scaledDistance + (mars.userData.scaledDistance - earth.userData.scaledDistance) / 2,
-      (earth.userData.scaledDistance + mars.userData.scaledDistance) / 2,
-      0, 2 * Math.PI,
-      false,
-      0
-    );
+    // Create a curved line for transfer orbit
+    const points = [];
+    const segments = 100;
     
-    const points = transferCurve.getPoints(100);
+    for (let i = 0; i <= segments; i++) {
+      const t = i / segments;
+      const angle = t * Math.PI;
+      
+      // Elliptical orbit parameters
+      const a = (earth.userData.scaledDistance + mars.userData.scaledDistance) / 2;
+      const b = (earth.userData.scaledDistance + mars.userData.scaledDistance) / 2 * 0.8;
+      
+      const x = Math.cos(angle) * a;
+      const y = Math.sin(angle) * b * 0.3;
+      const z = Math.sin(angle) * a;
+      
+      points.push(new THREE.Vector3(x, y, z));
+    }
+    
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
+    const material = new THREE.LineBasicMaterial({ 
+      color: 0x00ff00, 
+      transparent: true, 
+      opacity: 0.5,
+      linewidth: 1
+    });
     const transferOrbit = new THREE.Line(geometry, material);
-    transferOrbit.rotation.x = Math.PI / 2;
     scene.add(transferOrbit);
     transferOrbits.push(transferOrbit);
   }
