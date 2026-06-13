@@ -258,7 +258,7 @@ function createProceduralTexture(baseColor, planetName) {
 }
 
 function createSun() {
-  const geometry = new THREE.SphereGeometry(3, 32, 32);
+  const geometry = new THREE.SphereGeometry(1.5, 32, 32);
   const material = new THREE.MeshBasicMaterial({ 
     color: 0xffdd00,
     emissive: 0xffdd00
@@ -267,7 +267,7 @@ function createSun() {
   scene.add(sun);
   
   // 太阳光晕 | Sun Glow
-  const glowGeometry = new THREE.SphereGeometry(3.5, 32, 32);
+  const glowGeometry = new THREE.SphereGeometry(1.8, 32, 32);
   const glowMaterial = new THREE.MeshBasicMaterial({
     color: 0xffaa00,
     transparent: true,
@@ -294,7 +294,7 @@ function createPlanets() {
     planet.receiveShadow = false;
     
     // 缩放距离用于可视化 | Scale distance for visualization
-    const scaledDistance = data.distance * 2;
+    const scaledDistance = data.distance * 3 + 2;
     
     // 初始位置 | Initial Position
     planet.position.x = scaledDistance;
@@ -326,11 +326,11 @@ function createPlanetLabel(planet, name) {
   canvas.width = 256;
   canvas.height = 64;
   
-  context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  context.fillStyle = 'rgba(0, 0, 0, 0.2)';
   context.fillRect(0, 0, 256, 64);
   
   context.font = 'bold 28px Arial';
-  context.fillStyle = 'white';
+  context.fillStyle = 'rgba(255, 255, 255, 0.7)';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
   context.fillText(name, 128, 32);
@@ -339,6 +339,7 @@ function createPlanetLabel(planet, name) {
   const spriteMaterial = new THREE.SpriteMaterial({ 
     map: texture, 
     transparent: true,
+    opacity: 0.7,
     depthTest: false,
     depthWrite: false
   });
@@ -365,7 +366,7 @@ function createSaturnRings(planet) {
 
 function createOrbits() {
   planetData.forEach(data => {
-    const scaledDistance = data.distance * 2;
+    const scaledDistance = data.distance * 3 + 2;
     const orbitGeometry = new THREE.RingGeometry(scaledDistance - 0.05, scaledDistance + 0.05, 64);
     const orbitMaterial = new THREE.MeshBasicMaterial({
       color: 0x444444,
