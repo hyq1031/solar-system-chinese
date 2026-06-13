@@ -382,6 +382,17 @@ function createPlanets() {
       index: index
     };
     
+    // 添加点击检测球体 | Add click detection sphere (invisible but larger)
+    const clickGeometry = new THREE.SphereGeometry(data.radius * 2, 32, 32);
+    const clickMaterial = new THREE.MeshBasicMaterial({ 
+      transparent: true, 
+      opacity: 0,
+      side: THREE.DoubleSide
+    });
+    const clickSphere = new THREE.Mesh(clickGeometry, clickMaterial);
+    clickSphere.userData = planet.userData;
+    planet.add(clickSphere);
+    
     scene.add(planet);
     planets.push(planet);
     
