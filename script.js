@@ -784,6 +784,18 @@ function setupControls() {
     toggleSound();
   });
   
+  // 行星列表点击 | Planet List Click
+  document.querySelectorAll('#planet-list li').forEach(item => {
+    item.addEventListener('click', () => {
+      const planetName = item.getAttribute('data-planet');
+      focusOnPlanetByName(planetName);
+      
+      // Update active state
+      document.querySelectorAll('#planet-list li').forEach(li => li.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+  
   // 环境音 | Ambient Sound
   document.getElementById('ui').addEventListener('click', initAudio, { once: true });
 }
@@ -854,6 +866,35 @@ function toggleSound() {
     stopAmbientSound();
   } else {
     createAmbientSound();
+  }
+}
+
+function focusOnPlanetByName(planetName) {
+  const planet = planets.find(p => p.userData.nameCN === planetName);
+  if (planet) {
+    const targetPosition = planet.position.clone();
+    const offset = new THREE.Vector3(5, 5, 5);
+    
+    // Animate camera to planet
+    const startPosition = camera.position.clone();
+    const endPosition = targetPosition.clone().add(offset);
+    
+    let progress = 0;
+    function animateCamera() {
+      progress += 0.05;
+      if (progress >= 1) {
+        camera.position.copy(endPosition);
+        camera.lookAt(targetPosition);
+        showPlanetInfo(planet.userData);
+        return;
+      }
+      
+      camera.position.lerpVectors(startPosition, endPosition, progress);
+      camera.lookAt(targetPosition);
+      requestAnimationFrame(animateCamera);
+    }
+    
+    animateCamera();
   }
 }
 
