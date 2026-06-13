@@ -13,8 +13,18 @@ let showOrbits = true;
 let showLabels = true;
 let audioContext;
 let ambientSound;
+let labelSprites = [];
+let voyager1, voyager2;
+let showVoyagers = true;
+let eclipseOverlay;
+let showEclipse = false;
+let transferOrbits = [];
+let showTransfer = false;
+let launchPath;
+let showLaunch = false;
 
 // 行星数据 | Planet Data
+// 真实距离比例（天文单位 AU）| True scale distances (AU)
 const planetData = [
   {
     name: '水星 | Mercury',
@@ -23,7 +33,7 @@ const planetData = [
     description: '水星是太阳系中最小的行星，也是离太阳最近的行星。',
     descriptionEN: 'Mercury is the smallest planet in the Solar System and the closest to the Sun.',
     radius: 0.38,
-    distance: 4,
+    distance: 0.39, // 0.39 AU
     color: 0x8c8c8c,
     orbitalPeriod: 88,
     rotationPeriod: 59
@@ -35,7 +45,7 @@ const planetData = [
     description: '金星是太阳系中最热的行星，表面温度可达465°C。',
     descriptionEN: 'Venus is the hottest planet in the Solar System, with surface temperatures reaching 465°C.',
     radius: 0.95,
-    distance: 7,
+    distance: 0.72, // 0.72 AU
     color: 0xe6c87a,
     orbitalPeriod: 225,
     rotationPeriod: 243
@@ -47,7 +57,7 @@ const planetData = [
     description: '地球是太阳系中唯一已知存在生命的行星。',
     descriptionEN: 'Earth is the only known planet in the Solar System to harbor life.',
     radius: 1,
-    distance: 10,
+    distance: 1.0, // 1.0 AU
     color: 0x6b93d6,
     orbitalPeriod: 365,
     rotationPeriod: 1
@@ -59,7 +69,7 @@ const planetData = [
     description: '火星被称为红色星球，是太阳系中第二小的行星。',
     descriptionEN: 'Mars is known as the Red Planet and is the second smallest planet in the Solar System.',
     radius: 0.53,
-    distance: 15,
+    distance: 1.52, // 1.52 AU
     color: 0xc1440e,
     orbitalPeriod: 687,
     rotationPeriod: 1.03
@@ -71,7 +81,7 @@ const planetData = [
     description: '木星是太阳系中最大的行星，其质量是其他所有行星总和的2.5倍。',
     descriptionEN: 'Jupiter is the largest planet in the Solar System, with a mass 2.5 times that of all other planets combined.',
     radius: 3.5,
-    distance: 25,
+    distance: 5.2, // 5.2 AU
     color: 0xd8ca9d,
     orbitalPeriod: 4333,
     rotationPeriod: 0.41
@@ -83,7 +93,7 @@ const planetData = [
     description: '土星以其壮观的环系统而闻名，是太阳系中第二大行星。',
     descriptionEN: 'Saturn is famous for its spectacular ring system and is the second largest planet in the Solar System.',
     radius: 3,
-    distance: 35,
+    distance: 9.5, // 9.5 AU
     color: 0xead6b8,
     orbitalPeriod: 10759,
     rotationPeriod: 0.45
@@ -95,7 +105,7 @@ const planetData = [
     description: '天王星是太阳系中第三大行星，其自转轴几乎与轨道平面平行。',
     descriptionEN: 'Uranus is the third largest planet in the Solar System, with its rotation axis almost parallel to its orbital plane.',
     radius: 2,
-    distance: 45,
+    distance: 19.2, // 19.2 AU
     color: 0xd1e7e7,
     orbitalPeriod: 30687,
     rotationPeriod: 0.72
@@ -107,7 +117,7 @@ const planetData = [
     description: '海王星是太阳系中最遥远的行星，以强烈的风暴而闻名。',
     descriptionEN: 'Neptune is the most distant planet in the Solar System, known for its strong storms.',
     radius: 1.9,
-    distance: 55,
+    distance: 30.1, // 30.1 AU
     color: 0x5b5ddf,
     orbitalPeriod: 60190,
     rotationPeriod: 0.67
@@ -126,6 +136,8 @@ function init() {
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   document.getElementById('canvas-container').appendChild(renderer.domElement);
   
   // 控制器 | Controls
@@ -136,12 +148,15 @@ function init() {
   controls.maxDistance = 200;
   
   // 光照 | Lighting
-  const ambientLight = new THREE.AmbientLight(0x333333);
+  const ambientLight = new THREE.AmbientLight(0x222222);
   scene.add(ambientLight);
   
-  const pointLight = new THREE.PointLight(0xffffff, 2, 200);
-  pointLight.position.set(0, 0, 0);
-  scene.add(pointLight);
+  const sunLight = new THREE.PointLight(0xffffff, 2, 200);
+  sunLight.position.set(0, 0, 0);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.width = 2048;
+  sunLight.shadow.mapSize.height = 2048;
+  scene.add(sunLight);
   
   // 创建太阳 | Create Sun
   createSun();
@@ -151,6 +166,12 @@ function init() {
   
   // 创建轨道 | Create Orbits
   createOrbits();
+  
+  // 创建旅行者号 | Create Voyagers
+  createVoyagers();
+  
+  // 创建日食覆盖层 | Create Eclipse Overlay
+  createEclipseOverlay();
   
   // 创建背景星星 | Create Background Stars
   createStars();
@@ -269,13 +290,19 @@ function createPlanets() {
       metalness: 0.2
     });
     const planet = new THREE.Mesh(geometry, material);
+    planet.castShadow = true;
+    planet.receiveShadow = true;
+    
+    // 缩放距离用于可视化 | Scale distance for visualization
+    const scaledDistance = data.distance * 2;
     
     // 初始位置 | Initial Position
-    planet.position.x = data.distance;
+    planet.position.x = scaledDistance;
     
     // 存储行星数据 | Store Planet Data
     planet.userData = {
       ...data,
+      scaledDistance: scaledDistance,
       angle: Math.random() * Math.PI * 2,
       index: index
     };
@@ -283,11 +310,38 @@ function createPlanets() {
     scene.add(planet);
     planets.push(planet);
     
+    // 创建浮动标签 | Create Floating Label
+    createPlanetLabel(planet, data.nameCN);
+    
     // 土星环 | Saturn Rings
     if (data.nameCN === '土星') {
       createSaturnRings(planet);
     }
   });
+}
+
+function createPlanetLabel(planet, name) {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  canvas.width = 256;
+  canvas.height = 64;
+  
+  context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  context.fillRect(0, 0, 256, 64);
+  
+  context.font = 'bold 24px Arial';
+  context.fillStyle = 'white';
+  context.textAlign = 'center';
+  context.fillText(name, 128, 40);
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const sprite = new THREE.Sprite(spriteMaterial);
+  sprite.scale.set(4, 1, 1);
+  sprite.position.set(0, planet.userData.radius + 1, 0);
+  
+  planet.add(sprite);
+  labelSprites.push(sprite);
 }
 
 function createSaturnRings(planet) {
@@ -305,7 +359,8 @@ function createSaturnRings(planet) {
 
 function createOrbits() {
   planetData.forEach(data => {
-    const orbitGeometry = new THREE.RingGeometry(data.distance - 0.05, data.distance + 0.05, 64);
+    const scaledDistance = data.distance * 2;
+    const orbitGeometry = new THREE.RingGeometry(scaledDistance - 0.05, scaledDistance + 0.05, 64);
     const orbitMaterial = new THREE.MeshBasicMaterial({
       color: 0x444444,
       side: THREE.DoubleSide,
@@ -317,6 +372,137 @@ function createOrbits() {
     scene.add(orbit);
     orbits.push(orbit);
   });
+}
+
+function createVoyagers() {
+  // Voyager 1
+  const voyager1Geometry = new THREE.ConeGeometry(0.1, 0.3, 8);
+  const voyager1Material = new THREE.MeshBasicMaterial({ color: 0xff6600 });
+  voyager1 = new THREE.Mesh(voyager1Geometry, voyager1Material);
+  voyager1.position.set(5, 0, 0);
+  voyager1.rotation.z = Math.PI / 2;
+  voyager1.userData = {
+    angle: 0,
+    distance: 5,
+    speed: 0.005
+  };
+  scene.add(voyager1);
+  
+  // Voyager 2
+  const voyager2Geometry = new THREE.ConeGeometry(0.1, 0.3, 8);
+  const voyager2Material = new THREE.MeshBasicMaterial({ color: 0xff6600 });
+  voyager2 = new THREE.Mesh(voyager2Geometry, voyager2Material);
+  voyager2.position.set(7, 0, 0);
+  voyager2.rotation.z = Math.PI / 2;
+  voyager2.userData = {
+    angle: Math.PI,
+    distance: 7,
+    speed: 0.005
+  };
+  scene.add(voyager2);
+}
+
+function createEclipseOverlay() {
+  const eclipseGeometry = new THREE.SphereGeometry(100, 32, 32);
+  const eclipseMaterial = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    transparent: true,
+    opacity: 0.8,
+    side: THREE.BackSide
+  });
+  eclipseOverlay = new THREE.Mesh(eclipseGeometry, eclipseMaterial);
+  eclipseOverlay.visible = false;
+  scene.add(eclipseOverlay);
+}
+
+function createTransferOrbits() {
+  // Create Hohmann transfer orbits between Earth and Mars
+  const earth = planets.find(p => p.userData.nameCN === '地球');
+  const mars = planets.find(p => p.userData.nameCN === '火星');
+  
+  if (earth && mars) {
+    const transferCurve = new THREE.EllipseCurve(
+      0, 0,
+      earth.userData.scaledDistance + (mars.userData.scaledDistance - earth.userData.scaledDistance) / 2,
+      (earth.userData.scaledDistance + mars.userData.scaledDistance) / 2,
+      0, 2 * Math.PI,
+      false,
+      0
+    );
+    
+    const points = transferCurve.getPoints(100);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
+    const transferOrbit = new THREE.Line(geometry, material);
+    transferOrbit.rotation.x = Math.PI / 2;
+    scene.add(transferOrbit);
+    transferOrbits.push(transferOrbit);
+  }
+}
+
+function removeTransferOrbits() {
+  transferOrbits.forEach(orbit => scene.remove(orbit));
+  transferOrbits = [];
+}
+
+function showLaunchVisualization() {
+  // Create a launch trajectory from Earth
+  const earth = planets.find(p => p.userData.nameCN === '地球');
+  if (earth) {
+    const launchGeometry = new THREE.BufferGeometry();
+    const launchPoints = [];
+    
+    for (let i = 0; i < 50; i++) {
+      const t = i / 50;
+      const x = earth.position.x + t * 20;
+      const y = earth.position.y + t * 5;
+      const z = earth.position.z + t * 10;
+      launchPoints.push(new THREE.Vector3(x, y, z));
+    }
+    
+    launchGeometry.setFromPoints(launchPoints);
+    const launchMaterial = new THREE.LineBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.8 });
+    launchPath = new THREE.Line(launchGeometry, launchMaterial);
+    scene.add(launchPath);
+    
+    // Animate launch
+    animateLaunch(launchPath);
+  }
+}
+
+function animateLaunch(path) {
+  let progress = 0;
+  function animate() {
+    if (!showLaunch) {
+      if (path) scene.remove(path);
+      return;
+    }
+    
+    progress += 0.01;
+    if (progress >= 1) {
+      progress = 0;
+    }
+    
+    // Move a small spacecraft along the path
+    const position = new THREE.Vector3();
+    path.geometry.attributes.position.fromBufferAttribute(path.geometry.attributes.position);
+    const points = [];
+    for (let i = 0; i < path.geometry.attributes.position.count; i++) {
+      points.push(new THREE.Vector3(
+        path.geometry.attributes.position.getX(i),
+        path.geometry.attributes.position.getY(i),
+        path.geometry.attributes.position.getZ(i)
+      ));
+    }
+    
+    const index = Math.floor(progress * points.length);
+    if (points[index]) {
+      // Could add a spacecraft marker here
+    }
+    
+    requestAnimationFrame(animate);
+  }
+  animate();
 }
 
 function createStars() {
@@ -400,6 +586,38 @@ function setupControls() {
   // 标签切换 | Toggle Labels
   document.getElementById('toggle-labels').addEventListener('click', () => {
     showLabels = !showLabels;
+    labelSprites.forEach(sprite => sprite.visible = showLabels);
+  });
+  
+  // 旅行者号切换 | Toggle Voyagers
+  document.getElementById('toggle-voyagers').addEventListener('click', () => {
+    showVoyagers = !showVoyagers;
+    if (voyager1) voyager1.visible = showVoyagers;
+    if (voyager2) voyager2.visible = showVoyagers;
+  });
+  
+  // 日食切换 | Toggle Eclipse
+  document.getElementById('toggle-eclipse').addEventListener('click', () => {
+    showEclipse = !showEclipse;
+    if (eclipseOverlay) eclipseOverlay.visible = showEclipse;
+  });
+  
+  // 转移轨道 | Transfer Orbits
+  document.getElementById('show-transfer').addEventListener('click', () => {
+    showTransfer = !showTransfer;
+    if (showTransfer) {
+      createTransferOrbits();
+    } else {
+      removeTransferOrbits();
+    }
+  });
+  
+  // 发射 | Launch
+  document.getElementById('show-launch').addEventListener('click', () => {
+    showLaunch = !showLaunch;
+    if (showLaunch) {
+      showLaunchVisualization();
+    }
   });
   
   // 环境音 | Ambient Sound
@@ -480,13 +698,26 @@ function animate() {
     const orbitalSpeed = (2 * Math.PI) / (data.orbitalPeriod * 0.01) * speed;
     data.angle += orbitalSpeed * 0.01;
     
-    planet.position.x = Math.cos(data.angle) * data.distance;
-    planet.position.z = Math.sin(data.angle) * data.distance;
+    planet.position.x = Math.cos(data.angle) * data.scaledDistance;
+    planet.position.z = Math.sin(data.angle) * data.scaledDistance;
     
     // 自转 | Rotation
     const rotationSpeed = (2 * Math.PI) / (data.rotationPeriod * 0.1) * speed;
     planet.rotation.y += rotationSpeed * 0.01;
   });
+  
+  // 旅行者号运动 | Voyager Movement
+  if (showVoyagers && voyager1 && voyager2) {
+    voyager1.userData.angle += voyager1.userData.speed * speed;
+    voyager1.userData.distance += 0.01 * speed;
+    voyager1.position.x = Math.cos(voyager1.userData.angle) * voyager1.userData.distance;
+    voyager1.position.z = Math.sin(voyager1.userData.angle) * voyager1.userData.distance;
+    
+    voyager2.userData.angle += voyager2.userData.speed * speed;
+    voyager2.userData.distance += 0.01 * speed;
+    voyager2.position.x = Math.cos(voyager2.userData.angle) * voyager2.userData.distance;
+    voyager2.position.z = Math.sin(voyager2.userData.angle) * voyager2.userData.distance;
+  }
   
   controls.update();
   renderer.render(scene, camera);
