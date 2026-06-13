@@ -24,6 +24,7 @@ let launchPath;
 let showLaunch = false;
 let soundEnabled = false;
 let oscillators = [];
+let moon;
 
 // 行星数据 | Planet Data
 // 真实距离比例（天文单位 AU）| True scale distances (AU)
@@ -233,6 +234,9 @@ function init() {
   
   // 创建背景星星 | Create Background Stars
   createStars();
+  
+  // 创建月球 | Create Moon
+  createMoon();
   
   // 事件监听 | Event Listeners
   window.addEventListener('resize', onWindowResize);
@@ -629,6 +633,24 @@ function createStars() {
   scene.add(stars);
 }
 
+function createMoon() {
+  const moonGeometry = new THREE.SphereGeometry(0.15, 32, 32);
+  const moonMaterial = new THREE.MeshStandardMaterial({
+    color: 0xaaaaaa,
+    roughness: 0.9,
+    metalness: 0.1
+  });
+  moon = new THREE.Mesh(moonGeometry, moonMaterial);
+  moon.castShadow = false;
+  moon.receiveShadow = false;
+  moon.userData = {
+    angle: 0,
+    distance: 1.5,
+    orbitalPeriod: 27.3
+  };
+  scene.add(moon);
+}
+
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -883,6 +905,17 @@ function animate() {
     voyager2.userData.distance += 0.01 * speed;
     voyager2.position.x = Math.cos(voyager2.userData.angle) * voyager2.userData.distance;
     voyager2.position.z = Math.sin(voyager2.userData.angle) * voyager2.userData.distance;
+  }
+  
+  // 月球运动 | Moon Movement
+  if (moon) {
+    const earth = planets.find(p => p.userData.nameCN === '地球');
+    if (earth) {
+      moon.userData.angle += (2 * Math.PI) / (moon.userData.orbitalPeriod * 0.1) * (speed * 0.1);
+      const moonX = earth.position.x + Math.cos(moon.userData.angle) * moon.userData.distance;
+      const moonZ = earth.position.z + Math.sin(moon.userData.angle) * moon.userData.distance;
+      moon.position.set(moonX, earth.position.y, moonZ);
+    }
   }
   
   controls.update();
