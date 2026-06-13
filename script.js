@@ -36,7 +36,14 @@ const planetData = [
     distance: 0.39, // 0.39 AU
     color: 0x8c8c8c,
     orbitalPeriod: 88,
-    rotationPeriod: 59
+    rotationPeriod: 59,
+    diameter: '4,879 km',
+    age: '4.5 billion years',
+    surfaceTemp: '-173°C to 427°C',
+    coreTemp: '1,700°C',
+    type: 'Terrestrial',
+    mass: '3.285 × 10²³ kg',
+    lightToEarth: '3-10 minutes'
   },
   {
     name: '金星 | Venus',
@@ -48,7 +55,14 @@ const planetData = [
     distance: 0.72, // 0.72 AU
     color: 0xe6c87a,
     orbitalPeriod: 225,
-    rotationPeriod: 243
+    rotationPeriod: 243,
+    diameter: '12,104 km',
+    age: '4.5 billion years',
+    surfaceTemp: '462°C',
+    coreTemp: '5,000°C',
+    type: 'Terrestrial',
+    mass: '4.867 × 10²⁴ kg',
+    lightToEarth: '2-14 minutes'
   },
   {
     name: '地球 | Earth',
@@ -60,7 +74,14 @@ const planetData = [
     distance: 1.0, // 1.0 AU
     color: 0x6b93d6,
     orbitalPeriod: 365,
-    rotationPeriod: 1
+    rotationPeriod: 1,
+    diameter: '12,742 km',
+    age: '4.5 billion years',
+    surfaceTemp: '-89°C to 57°C',
+    coreTemp: '5,400°C',
+    type: 'Terrestrial',
+    mass: '5.972 × 10²⁴ kg',
+    lightToEarth: '0 minutes (home)'
   },
   {
     name: '火星 | Mars',
@@ -72,7 +93,14 @@ const planetData = [
     distance: 1.52, // 1.52 AU
     color: 0xc1440e,
     orbitalPeriod: 687,
-    rotationPeriod: 1.03
+    rotationPeriod: 1.03,
+    diameter: '6,779 km',
+    age: '4.5 billion years',
+    surfaceTemp: '-87°C to -5°C',
+    coreTemp: '1,500°C',
+    type: 'Terrestrial',
+    mass: '6.39 × 10²³ kg',
+    lightToEarth: '3-22 minutes'
   },
   {
     name: '木星 | Jupiter',
@@ -84,7 +112,14 @@ const planetData = [
     distance: 5.2, // 5.2 AU
     color: 0xd8ca9d,
     orbitalPeriod: 4333,
-    rotationPeriod: 0.41
+    rotationPeriod: 0.41,
+    diameter: '139,820 km',
+    age: '4.5 billion years',
+    surfaceTemp: '-108°C',
+    coreTemp: '24,000°C',
+    type: 'Gas Giant',
+    mass: '1.898 × 10²⁷ kg',
+    lightToEarth: '35-52 minutes'
   },
   {
     name: '土星 | Saturn',
@@ -96,7 +131,14 @@ const planetData = [
     distance: 9.5, // 9.5 AU
     color: 0xead6b8,
     orbitalPeriod: 10759,
-    rotationPeriod: 0.45
+    rotationPeriod: 0.45,
+    diameter: '116,460 km',
+    age: '4.5 billion years',
+    surfaceTemp: '-139°C',
+    coreTemp: '11,700°C',
+    type: 'Gas Giant',
+    mass: '5.683 × 10²⁶ kg',
+    lightToEarth: '65-80 minutes'
   },
   {
     name: '天王星 | Uranus',
@@ -108,7 +150,14 @@ const planetData = [
     distance: 19.2, // 19.2 AU
     color: 0xd1e7e7,
     orbitalPeriod: 30687,
-    rotationPeriod: 0.72
+    rotationPeriod: 0.72,
+    diameter: '50,724 km',
+    age: '4.5 billion years',
+    surfaceTemp: '-197°C',
+    coreTemp: '5,000°C',
+    type: 'Ice Giant',
+    mass: '8.681 × 10²⁵ kg',
+    lightToEarth: '2.5-2.7 hours'
   },
   {
     name: '海王星 | Neptune',
@@ -120,7 +169,14 @@ const planetData = [
     distance: 30.1, // 30.1 AU
     color: 0x5b5ddf,
     orbitalPeriod: 60190,
-    rotationPeriod: 0.67
+    rotationPeriod: 0.67,
+    diameter: '49,244 km',
+    age: '4.5 billion years',
+    surfaceTemp: '-201°C',
+    coreTemp: '5,400°C',
+    type: 'Ice Giant',
+    mass: '1.024 × 10²⁶ kg',
+    lightToEarth: '4.0-4.2 hours'
   }
 ];
 
@@ -579,6 +635,13 @@ function showPlanetInfo(data) {
   const infoPanel = document.getElementById('planet-info');
   document.getElementById('planet-name').textContent = data.name;
   document.getElementById('planet-description').textContent = data.description;
+  document.getElementById('planet-diameter').textContent = data.diameter || '-';
+  document.getElementById('planet-age').textContent = data.age || '-';
+  document.getElementById('planet-surface-temp').textContent = data.surfaceTemp || '-';
+  document.getElementById('planet-core-temp').textContent = data.coreTemp || '-';
+  document.getElementById('planet-type').textContent = data.type || '-';
+  document.getElementById('planet-mass').textContent = data.mass || '-';
+  document.getElementById('planet-light-to-earth').textContent = data.lightToEarth || '-';
   infoPanel.style.display = 'block';
 }
 
