@@ -800,8 +800,8 @@ function initAudio() {
 function createAmbientSound() {
   if (!audioContext || soundEnabled) return;
   
-  // Create multiple oscillators for space ambient sound
-  const frequencies = [60, 80, 120, 200];
+  // Create multiple oscillators for space ambient sound with better frequencies
+  const frequencies = [40, 60, 90, 150, 240];
   
   frequencies.forEach(freq => {
     const oscillator = audioContext.createOscillator();
@@ -813,8 +813,8 @@ function createAmbientSound() {
     // Random phase for each oscillator
     oscillator.phase = Math.random() * Math.PI * 2;
     
-    // Low volume for ambient effect
-    gainNode.gain.setValueAtTime(0.02, audioContext.currentTime);
+    // Increased volume for better ambient effect
+    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
     
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
