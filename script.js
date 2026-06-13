@@ -258,23 +258,42 @@ function createProceduralTexture(baseColor, planetName) {
 }
 
 function createSun() {
-  const geometry = new THREE.SphereGeometry(1.5, 32, 32);
+  // 太阳核心 | Sun Core
+  const geometry = new THREE.SphereGeometry(2, 64, 64);
   const material = new THREE.MeshBasicMaterial({ 
-    color: 0xffdd00,
-    emissive: 0xffdd00
+    color: 0xffaa00,
+    emissive: 0xffaa00
   });
   sun = new THREE.Mesh(geometry, material);
   scene.add(sun);
   
-  // 太阳光晕 | Sun Glow
-  const glowGeometry = new THREE.SphereGeometry(1.8, 32, 32);
-  const glowMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffaa00,
+  // 太阳光晕层 | Sun Glow Layers
+  const glow1Geometry = new THREE.SphereGeometry(2.3, 64, 64);
+  const glow1Material = new THREE.MeshBasicMaterial({
+    color: 0xff8800,
     transparent: true,
-    opacity: 0.3
+    opacity: 0.4
   });
-  const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-  sun.add(glow);
+  const glow1 = new THREE.Mesh(glow1Geometry, glow1Material);
+  sun.add(glow1);
+  
+  const glow2Geometry = new THREE.SphereGeometry(2.6, 64, 64);
+  const glow2Material = new THREE.MeshBasicMaterial({
+    color: 0xff6600,
+    transparent: true,
+    opacity: 0.2
+  });
+  const glow2 = new THREE.Mesh(glow2Geometry, glow2Material);
+  sun.add(glow2);
+  
+  const glow3Geometry = new THREE.SphereGeometry(3.0, 64, 64);
+  const glow3Material = new THREE.MeshBasicMaterial({
+    color: 0xff4400,
+    transparent: true,
+    opacity: 0.1
+  });
+  const glow3 = new THREE.Mesh(glow3Geometry, glow3Material);
+  sun.add(glow3);
 }
 
 function createPlanets() {
@@ -294,7 +313,7 @@ function createPlanets() {
     planet.receiveShadow = false;
     
     // 缩放距离用于可视化 | Scale distance for visualization
-    const scaledDistance = data.distance * 3 + 2;
+    const scaledDistance = data.distance * 1.5 + 3;
     
     // 初始位置 | Initial Position
     planet.position.x = scaledDistance;
@@ -366,7 +385,7 @@ function createSaturnRings(planet) {
 
 function createOrbits() {
   planetData.forEach(data => {
-    const scaledDistance = data.distance * 3 + 2;
+    const scaledDistance = data.distance * 1.5 + 3;
     const orbitGeometry = new THREE.RingGeometry(scaledDistance - 0.05, scaledDistance + 0.05, 64);
     const orbitMaterial = new THREE.MeshBasicMaterial({
       color: 0x444444,
