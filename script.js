@@ -22,6 +22,8 @@ let transferOrbits = [];
 let showTransfer = false;
 let launchPath;
 let showLaunch = false;
+let soundEnabled = false;
+let oscillators = [];
 
 // 行星数据 | Planet Data
 // 真实距离比例（天文单位 AU）| True scale distances (AU)
@@ -733,6 +735,11 @@ function setupControls() {
     }
   });
   
+  // 声音切换 | Toggle Sound
+  document.getElementById('toggle-sound').addEventListener('click', () => {
+    toggleSound();
+  });
+  
   // 环境音 | Ambient Sound
   document.getElementById('ui').addEventListener('click', initAudio, { once: true });
 }
@@ -747,21 +754,58 @@ function initAudio() {
 }
 
 function createAmbientSound() {
-  if (!audioContext) return;
+  if (!audioContext || soundEnabled) return;
   
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
+  // Create multiple oscillators for space ambient sound
+  const frequencies = [60, 80, 120, 200];
   
-  oscillator.type = 'sine';
-  oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
+  frequencies.forEach(freq => {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+    
+    // Random phase for each oscillator
+    oscillator.phase = Math.random() * Math.PI * 2;
+    
+    // Low volume for ambient effect
+    gainNode.gain.setValueAtTime(0.02, audioContext.currentTime);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start();
+    
+    oscillators.push({ oscillator, gainNode });
+  });
   
-  gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+  soundEnabled = true;
+}
+
+function stopAmbientSound() {
+  oscillators.forEach(({ oscillator, gainNode }) => {
+    // Fade out
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+    setTimeout(() => {
+      oscillator.stop();
+    }, 500);
+  });
+  oscillators = [];
+  soundEnabled = false;
+}
+
+function toggleSound() {
+  if (!audioContext) {
+    initAudio();
+    return;
+  }
   
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-  
-  oscillator.start();
-  ambientSound = { oscillator, gainNode };
+  if (soundEnabled) {
+    stopAmbientSound();
+  } else {
+    createAmbientSound();
+  }
 }
 
 function focusOnPlanet(index) {
