@@ -621,11 +621,21 @@ function onMouseClick(event) {
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, camera);
   
-  const intersects = raycaster.intersectObjects(planets);
+  const intersects = raycaster.intersectObjects(planets, true);
+  
+  console.log('Click detected, intersects:', intersects.length);
   
   if (intersects.length > 0) {
-    const planet = intersects[0].object;
-    showPlanetInfo(planet.userData);
+    // Find the parent planet (might hit a child like label or ring)
+    let planet = intersects[0].object;
+    while (planet.parent && !planet.userData.nameCN) {
+      planet = planet.parent;
+    }
+    
+    if (planet.userData.nameCN) {
+      console.log('Planet clicked:', planet.userData.nameCN);
+      showPlanetInfo(planet.userData);
+    }
   } else {
     hidePlanetInfo();
   }
