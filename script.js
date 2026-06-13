@@ -443,11 +443,11 @@ function createPlanetLabel(planet, name) {
   canvas.width = 256;
   canvas.height = 64;
   
-  context.fillStyle = 'rgba(0, 0, 0, 0.2)';
+  context.fillStyle = 'rgba(0, 0, 0, 0.1)';
   context.fillRect(0, 0, 256, 64);
   
-  context.font = 'bold 28px Arial';
-  context.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  context.font = 'bold 20px Arial';
+  context.fillStyle = 'rgba(255, 255, 255, 0.5)';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
   context.fillText(name, 128, 32);
@@ -456,13 +456,13 @@ function createPlanetLabel(planet, name) {
   const spriteMaterial = new THREE.SpriteMaterial({ 
     map: texture, 
     transparent: true,
-    opacity: 0.7,
+    opacity: 0.5,
     depthTest: false,
     depthWrite: false
   });
   const sprite = new THREE.Sprite(spriteMaterial);
-  sprite.scale.set(4, 1, 1);
-  sprite.position.set(0, planet.userData.radius + 2, 0);
+  sprite.scale.set(3, 0.75, 1);
+  sprite.position.set(0, planet.userData.radius + 1.5, 0);
   
   planet.add(sprite);
   labelSprites.push(sprite);
