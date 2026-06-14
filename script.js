@@ -777,7 +777,8 @@ function showPlanetInfo(data) {
 }
 
 function hidePlanetInfo() {
-  document.getElementById('planet-info').style.display = 'none';
+  const planetInfo = document.getElementById('planet-info');
+  planetInfo.style.display = 'none';
 }
 
 function setupControls() {
