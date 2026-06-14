@@ -44,128 +44,134 @@
     
     #planet-list {
     position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.7);
-    padding: 15px;
-    border-radius: 10px;
-    color: white;
-    font-family: Arial, sans-serif;
-    max-height: 80vh;
-    overflow-y: auto;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    width: 60px;
-  }
-  
-  #planet-list h3 {
-    margin: 0 0 10px 0;
-    font-size: 24px;
-    text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    padding-bottom: 10px;
-  }
-  
-  #planet-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  #planet-list li {
-    padding: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background 0.3s;
-    text-align: center;
-    position: relative;
-  }
-  
-  .planet-icon {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    position: relative;
-    vertical-align: middle;
-  }
-  
-  .planet-icon.mercury {
-    background: linear-gradient(135deg, #8c8c8c, #696969);
-  }
-  
-  .planet-icon.venus {
-    background: linear-gradient(135deg, #e6c87a, #c9a854);
-  }
-  
-  .planet-icon.earth {
-    background: linear-gradient(135deg, #6b93d6, #4f7dc9);
-  }
-  
-  .planet-icon.mars {
-    background: linear-gradient(135deg, #c1440e, #a3360a);
-  }
-  
-  .planet-icon.jupiter {
-    background: linear-gradient(135deg, #d4a574, #b8956a);
-  }
-  
-  .planet-icon.saturn {
-    background: linear-gradient(135deg, #f4d59e, #e6c87a);
-  }
-  
-  .planet-icon.saturn::after {
-    content: '';
-    position: absolute;
-    width: 40px;
-    height: 8px;
-    background: rgba(201, 184, 150, 0.6);
-    border-radius: 50%;
-    top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) rotate(-15deg);
-  }
-  
-  .planet-icon.uranus {
-    background: linear-gradient(135deg, #a8d8ea, #87ceeb);
-  }
-  
-  .planet-icon.neptune {
-    background: linear-gradient(135deg, #4b70dd, #3d5cc4);
-  }
-  
-  #planet-list li::after {
-    content: attr(data-fullname);
-    position: absolute;
-    left: 100%;
     top: 50%;
-    transform: translateY(-50%);
-    margin-left: 15px;
-    font-size: 14px;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s;
-    pointer-events: none;
-    background: rgba(0, 0, 0, 0.9);
-    padding: 5px 10px;
-    border-radius: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    z-index: 1000;
+    transform: translate(-50%, -50%);
+    background: rgba(10, 10, 20, 0.9);
+    padding: 20px 15px;
+    border-radius: 50px;
+    color: white;
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    max-height: 85vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    backdrop-filter: blur(10px);
   }
   
-  #planet-list li:hover::after {
-    opacity: 1;
-    visibility: visible;
+  #planet-list::-webkit-scrollbar {
+    width: 4px;
   }
   
-  #planet-list li:hover {
+  #planet-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+  }
+  
+  #planet-list::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
   }
   
-  #planet-list li.active {
-    background: rgba(255, 255, 255, 0.3);
-    font-weight: bold;
+  .planet-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .planet-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+  }
+  
+  .planet-item.active {
+    background: rgba(100, 150, 255, 0.2);
+    box-shadow: 0 0 15px rgba(100, 150, 255, 0.3);
+  }
+  
+  .planet-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-bottom: 6px;
+    box-shadow: 0 0 10px currentColor;
+    transition: all 0.3s ease;
+  }
+  
+  .planet-indicator.sun {
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    box-shadow: 0 0 15px #ffd700, 0 0 30px rgba(255, 215, 0, 0.5);
+  }
+  
+  .planet-indicator.mercury {
+    background: linear-gradient(135deg, #a0a0a0, #707070);
+    box-shadow: 0 0 8px #a0a0a0;
+  }
+  
+  .planet-indicator.venus {
+    background: linear-gradient(135deg, #e6c87a, #c9a854);
+    box-shadow: 0 0 10px #e6c87a;
+  }
+  
+  .planet-indicator.earth {
+    background: linear-gradient(135deg, #6b93d6, #4f7dc9);
+    box-shadow: 0 0 15px #6b93d6, 0 0 25px rgba(107, 147, 214, 0.5);
+  }
+  
+  .planet-indicator.mars {
+    background: linear-gradient(135deg, #c1440e, #a3360a);
+    box-shadow: 0 0 10px #c1440e;
+  }
+  
+  .planet-indicator.jupiter {
+    background: linear-gradient(135deg, #d4a574, #b8956a);
+    box-shadow: 0 0 12px #d4a574;
+  }
+  
+  .planet-indicator.saturn {
+    background: linear-gradient(135deg, #f4d59e, #e6c87a);
+    box-shadow: 0 0 12px #f4d59e;
+  }
+  
+  .planet-indicator.uranus {
+    background: linear-gradient(135deg, #a8d8ea, #87ceeb);
+    box-shadow: 0 0 12px #a8d8ea;
+  }
+  
+  .planet-indicator.neptune {
+    background: linear-gradient(135deg, #4b70dd, #3d5cc4);
+    box-shadow: 0 0 12px #4b70dd;
+  }
+  
+  .planet-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+  }
+  
+  .planet-item.active .planet-label {
+    color: #ffffff;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+  
+  .planet-item:hover .planet-label {
+    color: rgba(255, 255, 255, 1);
+  }
+  
+  .planet-item:hover .planet-indicator {
+    transform: scale(1.2);
   }
   
   #controls {
@@ -287,27 +293,24 @@
       }
       
       #planet-list {
-        width: 50px;
-        padding: 10px 5px;
+        width: 80px;
+        padding: 15px 10px;
+        left: 10px;
+        transform: translateY(-50%);
       }
       
-      #planet-list h3 {
-        font-size: 20px;
+      .planet-item {
+        padding: 6px 8px;
       }
       
-      #planet-list li {
-        padding: 8px;
+      .planet-indicator {
+        width: 10px;
+        height: 10px;
       }
       
-      .planet-icon {
-        width: 20px;
-        height: 20px;
-      }
-      
-      #planet-list li::after {
-        font-size: 12px;
-        margin-left: 10px;
-        padding: 4px 8px;
+      .planet-label {
+        font-size: 9px;
+        letter-spacing: 0.5px;
       }
       
       #controls {
@@ -370,17 +373,42 @@
   </div>
   
   <div id="planet-list">
-    <h3>🪐</h3>
-    <ul>
-      <li data-planet="水星" data-fullname="水星 | Mercury"><span class="planet-icon mercury"></span></li>
-      <li data-planet="金星" data-fullname="金星 | Venus"><span class="planet-icon venus"></span></li>
-      <li data-planet="地球" data-fullname="地球 | Earth"><span class="planet-icon earth"></span></li>
-      <li data-planet="火星" data-fullname="火星 | Mars"><span class="planet-icon mars"></span></li>
-      <li data-planet="木星" data-fullname="木星 | Jupiter"><span class="planet-icon jupiter"></span></li>
-      <li data-planet="土星" data-fullname="土星 | Saturn"><span class="planet-icon saturn"></span></li>
-      <li data-planet="天王星" data-fullname="天王星 | Uranus"><span class="planet-icon uranus"></span></li>
-      <li data-planet="海王星" data-fullname="海王星 | Neptune"><span class="planet-icon neptune"></span></li>
-    </ul>
+    <div class="planet-item" data-planet="太阳">
+      <span class="planet-indicator sun"></span>
+      <span class="planet-label">SOL</span>
+    </div>
+    <div class="planet-item" data-planet="水星">
+      <span class="planet-indicator mercury"></span>
+      <span class="planet-label">MERCURY</span>
+    </div>
+    <div class="planet-item" data-planet="金星">
+      <span class="planet-indicator venus"></span>
+      <span class="planet-label">VENUS</span>
+    </div>
+    <div class="planet-item active" data-planet="地球">
+      <span class="planet-indicator earth"></span>
+      <span class="planet-label">EARTH</span>
+    </div>
+    <div class="planet-item" data-planet="火星">
+      <span class="planet-indicator mars"></span>
+      <span class="planet-label">MARS</span>
+    </div>
+    <div class="planet-item" data-planet="木星">
+      <span class="planet-indicator jupiter"></span>
+      <span class="planet-label">JUPITER</span>
+    </div>
+    <div class="planet-item" data-planet="土星">
+      <span class="planet-indicator saturn"></span>
+      <span class="planet-label">SATURN</span>
+    </div>
+    <div class="planet-item" data-planet="天王星">
+      <span class="planet-indicator uranus"></span>
+      <span class="planet-label">URANUS</span>
+    </div>
+    <div class="planet-item" data-planet="海王星">
+      <span class="planet-indicator neptune"></span>
+      <span class="planet-label">NEPTUNE</span>
+    </div>
   </div>
   
   <div id="controls">

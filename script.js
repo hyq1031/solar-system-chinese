@@ -871,13 +871,13 @@ function setupControls() {
   });
   
   // 行星列表点击 | Planet List Click
-  document.querySelectorAll('#planet-list li').forEach(item => {
+  document.querySelectorAll('.planet-item').forEach(item => {
     item.addEventListener('click', () => {
       const planetName = item.getAttribute('data-planet');
       focusOnPlanetByName(planetName);
       
       // Update active state
-      document.querySelectorAll('#planet-list li').forEach(li => li.classList.remove('active'));
+      document.querySelectorAll('.planet-item').forEach(pi => pi.classList.remove('active'));
       item.classList.add('active');
     });
   });
