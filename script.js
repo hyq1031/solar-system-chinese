@@ -322,12 +322,16 @@ function createProceduralTexture(baseColor, planetName) {
 function createSun() {
   // 太阳核心 | Sun Core
   const geometry = new THREE.SphereGeometry(0.8, 64, 64);
+  
+  // Create procedural texture for sun
+  const texture = createProceduralTexture(0xffaa00, '太阳');
   const material = new THREE.MeshStandardMaterial({ 
+    map: texture,
     color: 0xffdd44,
     emissive: 0xffaa00,
-    emissiveIntensity: 0.8,
-    roughness: 0.8,
-    metalness: 0.2
+    emissiveIntensity: 0.5,
+    roughness: 0.6,
+    metalness: 0.3
   });
   sun = new THREE.Mesh(geometry, material);
   sun.castShadow = false;
