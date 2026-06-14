@@ -323,16 +323,51 @@ function createSun() {
   // 太阳核心 | Sun Core
   const geometry = new THREE.SphereGeometry(0.8, 64, 64);
   
-  // Create procedural texture for sun
-  const texture = createProceduralTexture(0xffaa00, '太阳');
-  const material = new THREE.MeshStandardMaterial({ 
-    map: texture,
-    color: 0xffdd44,
-    emissive: 0xffaa00,
-    emissiveIntensity: 0.5,
-    roughness: 0.6,
-    metalness: 0.3
+  // Create custom shader material for 3D sun effect
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0 },
+      color1: { value: new THREE.Color(0xffdd44) },
+      color2: { value: new THREE.Color(0xff8800) }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      
+      void main() {
+        vUv = uv;
+        vNormal = normal;
+        vPosition = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      uniform vec3 color1;
+      uniform vec3 color2;
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      
+      void main() {
+        // Create noise-like pattern for 3D effect
+        float noise = sin(vPosition.x * 10.0 + time) * cos(vPosition.y * 10.0 + time) * 0.5 + 0.5;
+        float noise2 = sin(vPosition.z * 8.0 - time * 0.5) * 0.5 + 0.5;
+        
+        // Mix colors based on noise and normal
+        float intensity = dot(vNormal, vec3(0.0, 0.0, 1.0));
+        vec3 finalColor = mix(color1, color2, noise * noise2);
+        
+        // Add rim lighting for 3D effect
+        float rim = 1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0)));
+        finalColor += rim * 0.3 * color1;
+        
+        gl_FragColor = vec4(finalColor, 1.0);
+      }
+    `
   });
+  
   sun = new THREE.Mesh(geometry, material);
   sun.castShadow = false;
   sun.receiveShadow = false;
@@ -994,6 +1029,11 @@ function animate() {
   
   // 太阳自转 | Sun Rotation
   sun.rotation.y += 0.001;
+  
+  // Animate sun shader
+  if (sun.material.uniforms && sun.material.uniforms.time) {
+    sun.material.uniforms.time.value += 0.01;
+  }
   
   // 行星运动 | Planet Movement
   planets.forEach(planet => {
