@@ -788,8 +788,9 @@ function setupControls() {
   });
   
   // 太阳系之旅 | Grand Tour
-  document.getElementById('grand-tour').addEventListener('click', () => {
+  document.getElementById('grand-tour').addEventListener('click', function() {
     grandTourMode = !grandTourMode;
+    this.classList.toggle('active', grandTourMode);
     if (grandTourMode) {
       grandTourIndex = 0;
       focusOnPlanet(grandTourIndex);
@@ -818,16 +819,18 @@ function setupControls() {
   });
   
   // 轨道切换 | Toggle Orbits
-  document.getElementById('toggle-orbits').addEventListener('click', () => {
+  document.getElementById('toggle-orbits').addEventListener('click', function() {
     showOrbits = !showOrbits;
+    this.classList.toggle('active', showOrbits);
     orbits.forEach(orbit => {
       orbit.visible = showOrbits;
     });
   });
   
   // 标签切换 | Toggle Labels
-  document.getElementById('toggle-labels').addEventListener('click', () => {
+  document.getElementById('toggle-labels').addEventListener('click', function() {
     showLabels = !showLabels;
+    this.classList.toggle('active', showLabels);
     labelSprites.forEach(sprite => sprite.visible = showLabels);
   });
   
@@ -835,21 +838,24 @@ function setupControls() {
   labelSprites.forEach(sprite => sprite.visible = showLabels);
   
   // 旅行者号切换 | Toggle Voyagers
-  document.getElementById('toggle-voyagers').addEventListener('click', () => {
+  document.getElementById('toggle-voyagers').addEventListener('click', function() {
     showVoyagers = !showVoyagers;
+    this.classList.toggle('active', showVoyagers);
     if (voyager1) voyager1.visible = showVoyagers;
     if (voyager2) voyager2.visible = showVoyagers;
   });
   
   // 日食切换 | Toggle Eclipse
-  document.getElementById('toggle-eclipse').addEventListener('click', () => {
+  document.getElementById('toggle-eclipse').addEventListener('click', function() {
     showEclipse = !showEclipse;
+    this.classList.toggle('active', showEclipse);
     if (eclipseOverlay) eclipseOverlay.visible = showEclipse;
   });
   
   // 转移轨道 | Transfer Orbits
-  document.getElementById('show-transfer').addEventListener('click', () => {
+  document.getElementById('show-transfer').addEventListener('click', function() {
     showTransfer = !showTransfer;
+    this.classList.toggle('active', showTransfer);
     if (showTransfer) {
       createTransferOrbits();
     } else {
@@ -858,16 +864,18 @@ function setupControls() {
   });
   
   // 发射 | Launch
-  document.getElementById('show-launch').addEventListener('click', () => {
+  document.getElementById('show-launch').addEventListener('click', function() {
     showLaunch = !showLaunch;
+    this.classList.toggle('active', showLaunch);
     if (showLaunch) {
       showLaunchVisualization();
     }
   });
   
   // 声音切换 | Toggle Sound
-  document.getElementById('toggle-sound').addEventListener('click', () => {
+  document.getElementById('toggle-sound').addEventListener('click', function() {
     toggleSound();
+    this.classList.toggle('active', soundEnabled);
   });
   
   // 行星列表点击 | Planet List Click

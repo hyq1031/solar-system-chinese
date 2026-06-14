@@ -25,9 +25,11 @@
     #ui {
       position: fixed;
       top: 20px;
-      left: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       color: white;
       z-index: 100;
+      text-align: center;
     }
     
     #ui h1 {
@@ -184,6 +186,12 @@
     
     #controls button:hover {
       background: rgba(255,255,255,0.2);
+    }
+    
+    #controls button.active {
+      background: rgba(100, 150, 255, 0.3);
+      border-color: rgba(100, 150, 255, 0.5);
+      box-shadow: 0 0 10px rgba(100, 150, 255, 0.3);
     }
     
     #planet-info {
@@ -352,9 +360,6 @@
   
   <div id="ui">
     <h1>太阳系 3D 可视化</h1>
-    <p>Solar System 3D Visualization</p>
-    <p>点击行星查看详情 | Click planets for details</p>
-    <p>拖动旋转 | 滚轮缩放 | Drag to rotate | Scroll to zoom</p>
   </div>
   
   <div id="planet-list">
