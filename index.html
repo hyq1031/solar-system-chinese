@@ -31,7 +31,7 @@
     }
     
     #ui h1 {
-      font-size: 24px;
+      font-size: 18px;
       margin-bottom: 10px;
       text-shadow: 0 0 10px rgba(255,255,255,0.5);
     }
@@ -48,39 +48,25 @@
     top: 50%;
     transform: translateY(-50%);
     background: rgba(10, 10, 20, 0.9);
-    padding: 20px 15px;
+    padding: 15px 12px;
     border-radius: 50px;
     color: white;
     font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-    max-height: 85vh;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
     backdrop-filter: blur(10px);
-  }
-  
-  #planet-list::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  #planet-list::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 2px;
-  }
-  
-  #planet-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
   }
   
   .planet-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 8px 12px;
+    padding: 6px 10px;
     cursor: pointer;
     border-radius: 20px;
     transition: all 0.3s ease;
@@ -98,10 +84,10 @@
   }
   
   .planet-indicator {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     box-shadow: 0 0 10px currentColor;
     transition: all 0.3s ease;
   }
@@ -152,9 +138,9 @@
   }
   
   .planet-label {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 500;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
