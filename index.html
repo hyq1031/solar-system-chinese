@@ -56,12 +56,6 @@
     overflow-y: auto;
     border: 1px solid rgba(255, 255, 255, 0.3);
     width: 60px;
-    overflow: hidden;
-    transition: width 0.3s;
-  }
-  
-  #planet-list:hover {
-    width: 180px;
   }
   
   #planet-list h3 {
@@ -89,10 +83,11 @@
   
   .planet-icon {
     display: inline-block;
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     position: relative;
+    vertical-align: middle;
   }
   
   .planet-icon.mercury {
@@ -152,13 +147,14 @@
     visibility: hidden;
     transition: all 0.3s;
     pointer-events: none;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.9);
     padding: 5px 10px;
     border-radius: 5px;
     border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 1000;
   }
   
-  #planet-list:hover li::after {
+  #planet-list li:hover::after {
     opacity: 1;
     visibility: visible;
   }
@@ -295,11 +291,6 @@
         padding: 10px 5px;
       }
       
-      #planet-list:hover {
-        width: 160px;
-        padding: 10px;
-      }
-      
       #planet-list h3 {
         font-size: 20px;
       }
@@ -309,8 +300,8 @@
       }
       
       .planet-icon {
-        width: 25px;
-        height: 25px;
+        width: 20px;
+        height: 20px;
       }
       
       #planet-list li::after {
