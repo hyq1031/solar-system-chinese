@@ -945,6 +945,7 @@ function stopAmbientSound() {
 function toggleSound() {
   if (!audioContext) {
     initAudio();
+    soundEnabled = false; // Reset to false since initAudio starts sound
     return;
   }
   
