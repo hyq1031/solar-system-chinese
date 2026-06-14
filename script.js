@@ -916,11 +916,15 @@ function focusOnPlanetByName(planetName) {
   const planet = planets.find(p => p.userData.nameCN === planetName);
   if (planet) {
     const targetPosition = planet.position.clone();
-    const offset = new THREE.Vector3(5, 5, 5);
+    
+    // Calculate a better camera position based on planet position
+    // Position camera at a distance from the planet with a good viewing angle
+    const distance = 10;
+    const cameraOffset = new THREE.Vector3(distance, distance * 0.5, distance);
+    const endPosition = targetPosition.clone().add(cameraOffset);
     
     // Animate camera to planet
     const startPosition = camera.position.clone();
-    const endPosition = targetPosition.clone().add(offset);
     
     let progress = 0;
     function animateCamera() {
@@ -928,12 +932,16 @@ function focusOnPlanetByName(planetName) {
       if (progress >= 1) {
         camera.position.copy(endPosition);
         camera.lookAt(targetPosition);
+        controls.target.copy(targetPosition);
+        controls.update();
         showPlanetInfo(planet.userData);
         return;
       }
       
       camera.position.lerpVectors(startPosition, endPosition, progress);
       camera.lookAt(targetPosition);
+      controls.target.lerp(targetPosition, progress);
+      controls.update();
       requestAnimationFrame(animateCamera);
     }
     
