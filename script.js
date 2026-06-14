@@ -321,10 +321,13 @@ function createProceduralTexture(baseColor, planetName) {
 
 function createSun() {
   // 太阳核心 | Sun Core
-  const geometry = new THREE.SphereGeometry(1.2, 64, 64);
-  const material = new THREE.MeshBasicMaterial({ 
+  const geometry = new THREE.SphereGeometry(0.8, 64, 64);
+  const material = new THREE.MeshStandardMaterial({ 
     color: 0xffdd44,
-    emissive: 0xffdd44
+    emissive: 0xffaa00,
+    emissiveIntensity: 0.8,
+    roughness: 0.8,
+    metalness: 0.2
   });
   sun = new THREE.Mesh(geometry, material);
   sun.castShadow = false;
@@ -346,7 +349,7 @@ function createSun() {
   scene.add(sun);
   
   // 太阳光晕层 | Sun Glow Layers
-  const glow1Geometry = new THREE.SphereGeometry(1.4, 64, 64);
+  const glow1Geometry = new THREE.SphereGeometry(0.95, 64, 64);
   const glow1Material = new THREE.MeshBasicMaterial({
     color: 0xffaa22,
     transparent: true,
@@ -355,7 +358,7 @@ function createSun() {
   const glow1 = new THREE.Mesh(glow1Geometry, glow1Material);
   sun.add(glow1);
   
-  const glow2Geometry = new THREE.SphereGeometry(1.6, 64, 64);
+  const glow2Geometry = new THREE.SphereGeometry(1.1, 64, 64);
   const glow2Material = new THREE.MeshBasicMaterial({
     color: 0xff8800,
     transparent: true,
@@ -364,7 +367,7 @@ function createSun() {
   const glow2 = new THREE.Mesh(glow2Geometry, glow2Material);
   sun.add(glow2);
   
-  const glow3Geometry = new THREE.SphereGeometry(1.9, 64, 64);
+  const glow3Geometry = new THREE.SphereGeometry(1.3, 64, 64);
   const glow3Material = new THREE.MeshBasicMaterial({
     color: 0xff6600,
     transparent: true,
@@ -373,7 +376,7 @@ function createSun() {
   const glow3 = new THREE.Mesh(glow3Geometry, glow3Material);
   sun.add(glow3);
   
-  const glow4Geometry = new THREE.SphereGeometry(2.3, 64, 64);
+  const glow4Geometry = new THREE.SphereGeometry(1.5, 64, 64);
   const glow4Material = new THREE.MeshBasicMaterial({
     color: 0xff4400,
     transparent: true,
