@@ -55,22 +55,21 @@
     max-height: 80vh;
     overflow-y: auto;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    width: 50px;
+    width: 60px;
     overflow: hidden;
     transition: width 0.3s;
   }
   
   #planet-list:hover {
-    width: 200px;
+    width: 180px;
   }
   
   #planet-list h3 {
     margin: 0 0 10px 0;
-    font-size: 16px;
+    font-size: 24px;
     text-align: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     padding-bottom: 10px;
-    white-space: nowrap;
   }
   
   #planet-list ul {
@@ -80,12 +79,31 @@
   }
   
   #planet-list li {
-    padding: 8px 12px;
+    padding: 10px;
     cursor: pointer;
     border-radius: 5px;
     transition: background 0.3s;
+    font-size: 24px;
+    text-align: center;
+    position: relative;
+  }
+  
+  #planet-list li::after {
+    content: attr(data-fullname);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 10px;
     font-size: 14px;
     white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  
+  #planet-list:hover li::after {
+    opacity: 1;
   }
   
   #planet-list li:hover {
@@ -216,31 +234,26 @@
       }
       
       #planet-list {
-        width: 40px;
+        width: 50px;
         padding: 10px 5px;
-        overflow: hidden;
-        transition: width 0.3s;
       }
       
       #planet-list:hover {
-        width: 180px;
-        padding: 15px;
+        width: 160px;
+        padding: 10px;
       }
       
       #planet-list h3 {
-        font-size: 12px;
-        white-space: nowrap;
+        font-size: 20px;
       }
       
       #planet-list li {
-        font-size: 12px;
-        padding: 6px 8px;
-        white-space: nowrap;
+        font-size: 20px;
+        padding: 8px;
       }
       
-      #planet-list:hover li {
-        font-size: 14px;
-        padding: 8px 12px;
+      #planet-list li::after {
+        font-size: 12px;
       }
       
       #controls {
@@ -303,16 +316,16 @@
   </div>
   
   <div id="planet-list">
-    <h3>行星列表 | Planet List</h3>
+    <h3>🪐</h3>
     <ul>
-      <li data-planet="水星">水星 | Mercury</li>
-      <li data-planet="金星">金星 | Venus</li>
-      <li data-planet="地球">地球 | Earth</li>
-      <li data-planet="火星">火星 | Mars</li>
-      <li data-planet="木星">木星 | Jupiter</li>
-      <li data-planet="土星">土星 | Saturn</li>
-      <li data-planet="天王星">天王星 | Uranus</li>
-      <li data-planet="海王星">海王星 | Neptune</li>
+      <li data-planet="水星" data-fullname="水星 | Mercury">☿️</li>
+      <li data-planet="金星" data-fullname="金星 | Venus">♀️</li>
+      <li data-planet="地球" data-fullname="地球 | Earth">🌍</li>
+      <li data-planet="火星" data-fullname="火星 | Mars">♂️</li>
+      <li data-planet="木星" data-fullname="木星 | Jupiter">♃</li>
+      <li data-planet="土星" data-fullname="土星 | Saturn">♄</li>
+      <li data-planet="天王星" data-fullname="天王星 | Uranus">⛢</li>
+      <li data-planet="海王星" data-fullname="海王星 | Neptune">♆</li>
     </ul>
   </div>
   
