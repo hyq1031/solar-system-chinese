@@ -83,9 +83,60 @@
     cursor: pointer;
     border-radius: 5px;
     transition: background 0.3s;
-    font-size: 24px;
     text-align: center;
     position: relative;
+  }
+  
+  .planet-icon {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position: relative;
+  }
+  
+  .planet-icon.mercury {
+    background: linear-gradient(135deg, #8c8c8c, #696969);
+  }
+  
+  .planet-icon.venus {
+    background: linear-gradient(135deg, #e6c87a, #c9a854);
+  }
+  
+  .planet-icon.earth {
+    background: linear-gradient(135deg, #6b93d6, #4f7dc9);
+  }
+  
+  .planet-icon.mars {
+    background: linear-gradient(135deg, #c1440e, #a3360a);
+  }
+  
+  .planet-icon.jupiter {
+    background: linear-gradient(135deg, #d4a574, #b8956a);
+  }
+  
+  .planet-icon.saturn {
+    background: linear-gradient(135deg, #f4d59e, #e6c87a);
+  }
+  
+  .planet-icon.saturn::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 8px;
+    background: rgba(201, 184, 150, 0.6);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+  }
+  
+  .planet-icon.uranus {
+    background: linear-gradient(135deg, #a8d8ea, #87ceeb);
+  }
+  
+  .planet-icon.neptune {
+    background: linear-gradient(135deg, #4b70dd, #3d5cc4);
   }
   
   #planet-list li::after {
@@ -94,16 +145,22 @@
     left: 100%;
     top: 50%;
     transform: translateY(-50%);
-    margin-left: 10px;
+    margin-left: 15px;
     font-size: 14px;
     white-space: nowrap;
     opacity: 0;
-    transition: opacity 0.3s;
+    visibility: hidden;
+    transition: all 0.3s;
     pointer-events: none;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
   
   #planet-list:hover li::after {
     opacity: 1;
+    visibility: visible;
   }
   
   #planet-list li:hover {
@@ -248,12 +305,18 @@
       }
       
       #planet-list li {
-        font-size: 20px;
         padding: 8px;
+      }
+      
+      .planet-icon {
+        width: 25px;
+        height: 25px;
       }
       
       #planet-list li::after {
         font-size: 12px;
+        margin-left: 10px;
+        padding: 4px 8px;
       }
       
       #controls {
@@ -318,14 +381,14 @@
   <div id="planet-list">
     <h3>🪐</h3>
     <ul>
-      <li data-planet="水星" data-fullname="水星 | Mercury">☿️</li>
-      <li data-planet="金星" data-fullname="金星 | Venus">♀️</li>
-      <li data-planet="地球" data-fullname="地球 | Earth">🌍</li>
-      <li data-planet="火星" data-fullname="火星 | Mars">♂️</li>
-      <li data-planet="木星" data-fullname="木星 | Jupiter">♃</li>
-      <li data-planet="土星" data-fullname="土星 | Saturn">♄</li>
-      <li data-planet="天王星" data-fullname="天王星 | Uranus">⛢</li>
-      <li data-planet="海王星" data-fullname="海王星 | Neptune">♆</li>
+      <li data-planet="水星" data-fullname="水星 | Mercury"><span class="planet-icon mercury"></span></li>
+      <li data-planet="金星" data-fullname="金星 | Venus"><span class="planet-icon venus"></span></li>
+      <li data-planet="地球" data-fullname="地球 | Earth"><span class="planet-icon earth"></span></li>
+      <li data-planet="火星" data-fullname="火星 | Mars"><span class="planet-icon mars"></span></li>
+      <li data-planet="木星" data-fullname="木星 | Jupiter"><span class="planet-icon jupiter"></span></li>
+      <li data-planet="土星" data-fullname="土星 | Saturn"><span class="planet-icon saturn"></span></li>
+      <li data-planet="天王星" data-fullname="天王星 | Uranus"><span class="planet-icon uranus"></span></li>
+      <li data-planet="海王星" data-fullname="海王星 | Neptune"><span class="planet-icon neptune"></span></li>
     </ul>
   </div>
   
