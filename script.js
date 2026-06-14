@@ -896,8 +896,14 @@ function initAudio() {
 }
 
 function createAmbientSound() {
-  if (!audioContext || soundEnabled) return;
+  if (!audioContext) return;
   
+  // Stop any existing sound first
+  if (soundEnabled) {
+    stopAmbientSound();
+  }
+  
+  console.log('Creating ambient sound');
   // Create multiple oscillators for space ambient sound with smoother frequencies
   const frequencies = [30, 45, 70, 110, 180];
   
@@ -931,21 +937,32 @@ function createAmbientSound() {
 }
 
 function stopAmbientSound() {
+  console.log('Stopping ambient sound, oscillators:', oscillators.length);
   oscillators.forEach(({ oscillator, gainNode }) => {
-    // Fade out
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-    setTimeout(() => {
-      oscillator.stop();
-    }, 500);
+    try {
+      // Fade out immediately
+      gainNode.gain.setValueAtTime(gainNode.gain.value, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+      setTimeout(() => {
+        try {
+          oscillator.stop();
+        } catch (e) {
+          console.log('Oscillator already stopped:', e);
+        }
+      }, 100);
+    } catch (e) {
+      console.log('Error stopping oscillator:', e);
+    }
   });
   oscillators = [];
   soundEnabled = false;
+  console.log('Sound stopped, soundEnabled:', soundEnabled);
 }
 
 function toggleSound() {
+  console.log('Toggle sound called, soundEnabled:', soundEnabled);
   if (!audioContext) {
     initAudio();
-    soundEnabled = false; // Reset to false since initAudio starts sound
     return;
   }
   
