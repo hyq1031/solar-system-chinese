@@ -21,28 +21,28 @@ An interactive 3D solar system visualization built with Three.js, featuring Chin
   **轨道控制** - 拖动旋转，滚轮缩放
 - **Click to Explore** - Click any planet to view detailed information
   **点击探索** - 点击任何行星查看详细信息
-- **Planet List Sidebar** - Click planet names to focus camera on specific planets
-  **行星列表侧边栏** - 点击行星名称将相机聚焦到特定行星
+- **Planet List Sidebar** - Modern pill-shaped sidebar with planet indicators, click to focus camera
+  **行星列表侧边栏** - 现代药丸形侧边栏，带有行星指示器，点击聚焦相机
 - **Sun Clickable** - Click the sun to view its detailed information
   **太阳可点击** - 点击太阳查看其详细信息
 - **Speed Control** - Adjust simulation speed with slider (0.1 to 10)
   **速度控制** - 使用滑块调整模拟速度（0.1 到 10）
 - **Grand Tour Mode** - Automated tour through the solar system (resets camera to top-down view when toggled off)
   **太阳系之旅模式** - 自动游览太阳系（关闭时重置相机为俯视图）
-- **Toggle Orbits** - Show/hide orbital paths
-  **切换轨道** - 显示/隐藏轨道路径
-- **Toggle Labels** - Show/hide planet labels
-  **切换标签** - 显示/隐藏行星标签
-- **Toggle Voyagers** - Show/hide Voyager spacecraft models
-  **切换旅行者号** - 显示/隐藏旅行者号航天器模型
-- **Toggle Eclipse** - Show/hide eclipse visualization
-  **切换日食** - 显示/隐藏日食可视化
-- **Toggle Transfer** - Show/hide Hohmann transfer orbit between Earth and Mars
-  **切换转移轨道** - 显示/隐藏地球和火星之间的霍曼转移轨道
-- **Toggle Launch** - Show/hide launch trajectory visualization
-  **切换发射** - 显示/隐藏发射轨迹可视化
-- **Toggle Sound** - Turn ambient space sound on/off
-  **切换声音** - 开启/关闭环境太空音效
+- **Toggle Orbits** - Show/hide orbital paths with visual active state
+  **切换轨道** - 显示/隐藏轨道路径，带有视觉活动状态
+- **Toggle Labels** - Show/hide planet labels with visual active state
+  **切换标签** - 显示/隐藏行星标签，带有视觉活动状态
+- **Toggle Voyagers** - Show/hide Voyager spacecraft models with visual active state
+  **切换旅行者号** - 显示/隐藏旅行者号航天器模型，带有视觉活动状态
+- **Toggle Eclipse** - Show/hide eclipse visualization with visual active state
+  **切换日食** - 显示/隐藏日食可视化，带有视觉活动状态
+- **Toggle Transfer** - Show/hide Hohmann transfer orbit with visual active state
+  **切换转移轨道** - 显示/隐藏霍曼转移轨道，带有视觉活动状态
+- **Toggle Launch** - Show/hide launch trajectory with visual active state
+  **切换发射** - 显示/隐藏发射轨迹，带有视觉活动状态
+- **Toggle Sound** - Turn ambient space sound on/off with visual active state
+  **切换声音** - 开启/关闭环境太空音效，带有视觉活动状态
 
 ### Chinese Localization | 中文本地化
 - **Bilingual Interface** - All UI elements in Chinese and English
@@ -72,6 +72,18 @@ An interactive 3D solar system visualization built with Three.js, featuring Chin
   **太阳信息** - 点击太阳查看其详细规格
 
 ### Visual Enhancements | 视觉增强
+- **Modern Sidebar Design** - Pill-shaped sidebar with colored planet indicators and Chinese labels
+  **现代侧边栏设计** - 药丸形侧边栏，带有彩色行星指示器和中文名称
+- **Mobile-Friendly Layout** - Responsive design optimized for mobile devices
+  **移动友好布局** - 为移动设备优化的响应式设计
+- **Centered Title** - Title positioned at center top for clean appearance
+  **居中标题** - 标题位于顶部中心，外观简洁
+- **Active Button States** - Visual indication (blue glow) for selected function buttons
+  **活动按钮状态** - 选定的功能按钮的视觉指示（蓝色光晕）
+- **Compact Control Panel** - Function buttons arranged in 2-column grid at bottom right
+  **紧凑控制面板** - 功能按钮在右下角以 2 列网格排列
+- **Close Button** - Planet info panel includes close button for easy dismissal
+  **关闭按钮** - 行星信息面板包含关闭按钮，便于关闭
 - **Custom Sun Shader** - 3D sun with animated noise patterns and rim lighting
   **自定义太阳着色器** - 带有动画噪点模式和边缘照明的 3D 太阳
 - **Elegant UI Panels** - Bordered panels with gold accents for planet information
@@ -114,26 +126,26 @@ An interactive 3D solar system visualization built with Three.js, featuring Chin
   **鼠标滚轮** - 放大/缩小
 - **Click Planet/Sun** - View detailed information
   **点击行星/太阳** - 查看详细信息
-- **Planet List Sidebar** - Click planet names to focus camera
-  **行星列表侧边栏** - 点击行星名称聚焦相机
+- **Planet List Sidebar** - Modern pill-shaped sidebar with colored planet indicators and Chinese labels, positioned on left side
+  **行星列表侧边栏** - 现代药丸形侧边栏，位于左侧，带有彩色行星指示器和中文名称
 - **Grand Tour Button** - Start automated tour (click again to reset to top-down view)
   **太阳系之旅按钮** - 开始自动游览（再次点击重置为俯视图）
 - **Speed Slider** - Adjust simulation speed (0.1 to 10)
   **速度滑块** - 调整模拟速度（0.1 到 10）
-- **Toggle Orbits** - Show/hide orbital paths
-  **切换轨道** - 显示/隐藏轨道路径
-- **Toggle Labels** - Show/hide labels
-  **切换标签** - 显示/隐藏标签
-- **Toggle Voyagers** - Show/hide Voyager spacecraft
-  **切换旅行者号** - 显示/隐藏旅行者号航天器
-- **Toggle Eclipse** - Show/hide eclipse visualization
-  **切换日食** - 显示/隐藏日食可视化
-- **Toggle Transfer** - Show/hide transfer orbit
-  **切换转移轨道** - 显示/隐藏转移轨道
-- **Toggle Launch** - Show/hide launch trajectory
-  **切换发射** - 显示/隐藏发射轨迹
-- **Toggle Sound** - Turn ambient sound on/off
-  **切换声音** - 开启/关闭环境音效
+- **Toggle Orbits** - Show/hide orbital paths (with visual active state)
+  **切换轨道** - 显示/隐藏轨道路径（带有视觉活动状态）
+- **Toggle Labels** - Show/hide labels (with visual active state)
+  **切换标签** - 显示/隐藏标签（带有视觉活动状态）
+- **Toggle Voyagers** - Show/hide Voyager spacecraft (with visual active state)
+  **切换旅行者号** - 显示/隐藏旅行者号航天器（带有视觉活动状态）
+- **Toggle Eclipse** - Show/hide eclipse visualization (with visual active state)
+  **切换日食** - 显示/隐藏日食可视化（带有视觉活动状态）
+- **Toggle Transfer** - Show/hide transfer orbit (with visual active state)
+  **切换转移轨道** - 显示/隐藏转移轨道（带有视觉活动状态）
+- **Toggle Launch** - Show/hide launch trajectory (with visual active state)
+  **切换发射** - 显示/隐藏发射轨迹（带有视觉活动状态）
+- **Toggle Sound** - Turn ambient sound on/off (with visual active state)
+  **切换声音** - 开启/关闭环境音效（带有视觉活动状态）
 
 ## 🌍 Planets Included | 包含的行星
 
@@ -210,16 +222,26 @@ const orbitalSpeed = (2 * Math.PI) / (data.orbitalPeriod * 0.01) * (speed * 0.1)
 ## 🔄 Recent Updates | 最近更新
 
 ### Latest Features | 最新功能
-- **Planet List Sidebar** - Interactive sidebar for quick planet navigation
-  **行星列表侧边栏** - 用于快速导航的交互式侧边栏
+- **Modern Sidebar Design** - Pill-shaped sidebar with colored planet indicators and Chinese labels
+  **现代侧边栏设计** - 药丸形侧边栏，带有彩色行星指示器和中文名称
+- **Mobile-Friendly Layout** - Responsive design optimized for mobile devices
+  **移动友好布局** - 为移动设备优化的响应式设计
+- **Centered Title** - Clean title positioning at center top
+  **居中标题** - 标题位于顶部中心，外观简洁
+- **Active Button States** - Visual indication (blue glow) for selected function buttons
+  **活动按钮状态** - 选定的功能按钮的视觉指示（蓝色光晕）
+- **Compact Control Panel** - Function buttons arranged in 2-column grid at bottom right
+  **紧凑控制面板** - 功能按钮在右下角以 2 列网格排列
+- **Close Button** - Planet info panel includes close button for easy dismissal
+  **关闭按钮** - 行星信息面板包含关闭按钮，便于关闭
 - **Enhanced Sun** - Custom shader-based 3D sun with animated surface
   **增强的太阳** - 基于自定义着色器的 3D 太阳，带有动画表面
 - **Moon System** - Added moon orbiting Earth
   **月球系统** - 添加了绕地球运行的月球
 - **Detailed Planet Information** - Comprehensive data display for all celestial bodies
   **详细行星信息** - 所有天体的全面数据显示
-- **Improved Audio** - Smoother ambient sound with triangle waves
-  **改进的音频** - 使用三角波的更平滑的环境音
+- **Improved Audio** - Smoother ambient sound with triangle waves and debugging
+  **改进的音频** - 使用三角波的更平滑的环境音，带有调试功能
 - **Visual Enhancements** - Elegant bordered panels, transparent labels
   **视觉增强** - 优雅的边框面板、透明标签
 
