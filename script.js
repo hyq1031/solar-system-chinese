@@ -1221,9 +1221,6 @@ function setupControls() {
     }
   });
 
-  // 环境音 | Ambient Sound
-  document.getElementById('ui').addEventListener('click', initAudio, { once: true });
-
   // 控制面板折叠 | Toolbar collapse/close/auto-expand
   setupPanelCollapse('controls', 'controls-reopen', 'toolbar-minimize', 'toolbar-close');
 
@@ -1484,7 +1481,6 @@ function setupPanelCollapse(panelId, reopenBtnId, minimizeBtnId, closeBtnId) {
 function initAudio() {
   try {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    createAmbientSound();
   } catch (e) {
     // Web Audio API not supported in this browser
   }
@@ -1492,12 +1488,7 @@ function initAudio() {
 
 function createAmbientSound() {
   if (!audioContext) return;
-  
-  // Stop any existing sound first
-  if (soundEnabled) {
-    stopAmbientSound();
-  }
-  
+
   // Create multiple oscillators for space ambient sound with smoother frequencies
   const frequencies = [30, 45, 70, 110, 180];
   
@@ -1526,8 +1517,6 @@ function createAmbientSound() {
     
     oscillators.push({ oscillator, gainNode });
   });
-  
-  soundEnabled = true;
 }
 
 function stopAmbientSound() {
@@ -1548,17 +1537,26 @@ function stopAmbientSound() {
     }
   });
   oscillators = [];
-  soundEnabled = false;
 }
 
 function toggleSound() {
   if (!audioContext) {
     initAudio();
+  }
+  if (!audioContext) return;
+
+  if (soundEnabled) {
+    soundEnabled = false;
+    stopAmbientSound();
     return;
   }
-  
-  if (soundEnabled) {
-    stopAmbientSound();
+
+  soundEnabled = true;
+  // iOS Safari creates AudioContext in a suspended state even from within a
+  // user gesture, and can re-suspend it after the tab loses focus — resume()
+  // must be called every time, not just once at construction.
+  if (audioContext.state === 'suspended') {
+    audioContext.resume().then(createAmbientSound);
   } else {
     createAmbientSound();
   }
