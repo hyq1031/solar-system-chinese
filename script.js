@@ -2,9 +2,9 @@
 // Solar System 3D Visualization
 
 let scene, camera, renderer, controls;
+let clock = new THREE.Clock();
 let planets = [];
 let orbits = [];
-let labels = [];
 let sun;
 let speed = 1;
 let grandTourMode = false;
@@ -428,7 +428,7 @@ function createSun() {
 function createPlanets() {
   planetData.forEach((data, index) => {
     // 行星几何体 | Planet Geometry
-    const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
+    const geometry = new THREE.SphereGeometry(data.radius, 32, 32);
     
     // 程序化纹理 | Procedural Texture
     const texture = createProceduralTexture(data.color, data.nameCN);
@@ -654,29 +654,12 @@ function animateLaunch(path) {
       if (path) scene.remove(path);
       return;
     }
-    
+
     progress += 0.01;
     if (progress >= 1) {
       progress = 0;
     }
-    
-    // Move a small spacecraft along the path
-    const position = new THREE.Vector3();
-    path.geometry.attributes.position.fromBufferAttribute(path.geometry.attributes.position);
-    const points = [];
-    for (let i = 0; i < path.geometry.attributes.position.count; i++) {
-      points.push(new THREE.Vector3(
-        path.geometry.attributes.position.getX(i),
-        path.geometry.attributes.position.getY(i),
-        path.geometry.attributes.position.getZ(i)
-      ));
-    }
-    
-    const index = Math.floor(progress * points.length);
-    if (points[index]) {
-      // Could add a spacecraft marker here
-    }
-    
+
     requestAnimationFrame(animate);
   }
   animate();
@@ -737,24 +720,20 @@ function onMouseClick(event) {
   // Check if sun is clicked
   const sunIntersects = raycaster.intersectObject(sun, true);
   if (sunIntersects.length > 0) {
-    console.log('Sun clicked');
     showPlanetInfo(sun.userData);
     return;
   }
   
   const intersects = raycaster.intersectObjects(planets, true);
-  
-  console.log('Click detected, intersects:', intersects.length);
-  
+
   if (intersects.length > 0) {
     // Find the parent planet (might hit a child like label or ring)
     let planet = intersects[0].object;
     while (planet.parent && !planet.userData.nameCN) {
       planet = planet.parent;
     }
-    
+
     if (planet.userData.nameCN) {
-      console.log('Planet clicked:', planet.userData.nameCN);
       showPlanetInfo(planet.userData);
     }
   } else {
@@ -791,6 +770,7 @@ function setupControls() {
   document.getElementById('grand-tour').addEventListener('click', function() {
     grandTourMode = !grandTourMode;
     this.classList.toggle('active', grandTourMode);
+    this.setAttribute('aria-pressed', String(grandTourMode));
     if (grandTourMode) {
       grandTourIndex = 0;
       focusOnPlanet(grandTourIndex);
@@ -822,76 +802,167 @@ function setupControls() {
   document.getElementById('toggle-orbits').addEventListener('click', function() {
     showOrbits = !showOrbits;
     this.classList.toggle('active', showOrbits);
+    this.setAttribute('aria-pressed', String(showOrbits));
     orbits.forEach(orbit => {
       orbit.visible = showOrbits;
     });
   });
-  
+
   // 标签切换 | Toggle Labels
   document.getElementById('toggle-labels').addEventListener('click', function() {
     showLabels = !showLabels;
     this.classList.toggle('active', showLabels);
+    this.setAttribute('aria-pressed', String(showLabels));
     labelSprites.forEach(sprite => sprite.visible = showLabels);
   });
-  
+
   // Ensure labels are visible by default
   labelSprites.forEach(sprite => sprite.visible = showLabels);
-  
+
   // 旅行者号切换 | Toggle Voyagers
   document.getElementById('toggle-voyagers').addEventListener('click', function() {
     showVoyagers = !showVoyagers;
     this.classList.toggle('active', showVoyagers);
+    this.setAttribute('aria-pressed', String(showVoyagers));
     if (voyager1) voyager1.visible = showVoyagers;
     if (voyager2) voyager2.visible = showVoyagers;
   });
-  
+
   // 日食切换 | Toggle Eclipse
   document.getElementById('toggle-eclipse').addEventListener('click', function() {
     showEclipse = !showEclipse;
     this.classList.toggle('active', showEclipse);
+    this.setAttribute('aria-pressed', String(showEclipse));
     if (eclipseOverlay) eclipseOverlay.visible = showEclipse;
   });
-  
+
   // 转移轨道 | Transfer Orbits
   document.getElementById('show-transfer').addEventListener('click', function() {
     showTransfer = !showTransfer;
     this.classList.toggle('active', showTransfer);
+    this.setAttribute('aria-pressed', String(showTransfer));
     if (showTransfer) {
       createTransferOrbits();
     } else {
       removeTransferOrbits();
     }
   });
-  
+
   // 发射 | Launch
   document.getElementById('show-launch').addEventListener('click', function() {
     showLaunch = !showLaunch;
     this.classList.toggle('active', showLaunch);
+    this.setAttribute('aria-pressed', String(showLaunch));
     if (showLaunch) {
       showLaunchVisualization();
     }
   });
-  
+
   // 声音切换 | Toggle Sound
   document.getElementById('toggle-sound').addEventListener('click', function() {
     toggleSound();
     this.classList.toggle('active', soundEnabled);
+    this.setAttribute('aria-pressed', String(soundEnabled));
   });
-  
+
   // 行星列表点击 | Planet List Click
+  function selectPlanetItem(item) {
+    const planetName = item.getAttribute('data-planet');
+    focusOnPlanetByName(planetName);
+
+    // Update active state
+    document.querySelectorAll('.planet-item').forEach(pi => pi.classList.remove('active'));
+    item.classList.add('active');
+  }
+
   document.querySelectorAll('.planet-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const planetName = item.getAttribute('data-planet');
-      focusOnPlanetByName(planetName);
-      
-      // Update active state
-      document.querySelectorAll('.planet-item').forEach(pi => pi.classList.remove('active'));
-      item.classList.add('active');
+    item.addEventListener('click', () => selectPlanetItem(item));
+    item.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        selectPlanetItem(item);
+      }
     });
   });
   
   // 环境音 | Ambient Sound
   document.getElementById('ui').addEventListener('click', initAudio, { once: true });
+
+  // 控制面板折叠 | Toolbar collapse/close/auto-expand
+  setupToolbarCollapse();
+}
+
+function setupToolbarCollapse() {
+  const panel = document.getElementById('controls');
+  const reopenBtn = document.getElementById('controls-reopen');
+  const minimizeBtn = document.getElementById('toolbar-minimize');
+  const closeBtn = document.getElementById('toolbar-close');
+  const supportsHover = window.matchMedia('(hover: hover)').matches;
+  let hoverCollapseTimer = null;
+  let hoverExpanded = false;
+
+  function expand() {
+    clearTimeout(hoverCollapseTimer);
+    panel.classList.remove('minimized', 'closed');
+    reopenBtn.hidden = true;
+  }
+
+  function minimize() {
+    clearTimeout(hoverCollapseTimer);
+    hoverExpanded = false;
+    panel.classList.add('minimized');
+    panel.classList.remove('closed');
+    reopenBtn.hidden = true;
+  }
+
+  function close() {
+    clearTimeout(hoverCollapseTimer);
+    hoverExpanded = false;
+    panel.classList.add('closed');
+    panel.classList.remove('minimized');
+    reopenBtn.hidden = false;
+  }
+
+  minimizeBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    minimize();
+  });
+
+  closeBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    close();
+  });
+
+  reopenBtn.addEventListener('click', expand);
+
+  // Tap/click anywhere on a minimized panel (outside the icon buttons) re-expands it,
+  // which is the only way to reopen on touch devices that have no hover.
+  panel.addEventListener('click', () => {
+    if (panel.classList.contains('minimized')) {
+      expand();
+    }
+  });
+
+  if (supportsHover) {
+    // Auto-pop: moving the cursor over a minimized panel expands it automatically;
+    // moving away re-minimizes it after a short delay. Only panels that were
+    // expanded this way auto re-collapse — a panel left in its default/manually
+    // expanded state stays open when the mouse moves away.
+    panel.addEventListener('mouseenter', () => {
+      if (panel.classList.contains('minimized')) {
+        hoverExpanded = true;
+        expand();
+      }
+    });
+    panel.addEventListener('mouseleave', () => {
+      if (hoverExpanded) {
+        hoverCollapseTimer = setTimeout(() => {
+          minimize();
+          hoverExpanded = false;
+        }, 800);
+      }
+    });
+  }
 }
 
 function initAudio() {
@@ -899,7 +970,7 @@ function initAudio() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     createAmbientSound();
   } catch (e) {
-    console.log('Audio not supported');
+    // Web Audio API not supported in this browser
   }
 }
 
@@ -911,7 +982,6 @@ function createAmbientSound() {
     stopAmbientSound();
   }
   
-  console.log('Creating ambient sound');
   // Create multiple oscillators for space ambient sound with smoother frequencies
   const frequencies = [30, 45, 70, 110, 180];
   
@@ -945,7 +1015,6 @@ function createAmbientSound() {
 }
 
 function stopAmbientSound() {
-  console.log('Stopping ambient sound, oscillators:', oscillators.length);
   oscillators.forEach(({ oscillator, gainNode }) => {
     try {
       // Fade out immediately
@@ -955,20 +1024,18 @@ function stopAmbientSound() {
         try {
           oscillator.stop();
         } catch (e) {
-          console.log('Oscillator already stopped:', e);
+          // Oscillator already stopped
         }
       }, 100);
     } catch (e) {
-      console.log('Error stopping oscillator:', e);
+      // Oscillator already disconnected
     }
   });
   oscillators = [];
   soundEnabled = false;
-  console.log('Sound stopped, soundEnabled:', soundEnabled);
 }
 
 function toggleSound() {
-  console.log('Toggle sound called, soundEnabled:', soundEnabled);
   if (!audioContext) {
     initAudio();
     return;
@@ -1051,57 +1118,68 @@ function focusOnPlanet(index) {
   animateCamera();
 }
 
+const VOYAGER_MAX_DISTANCE = 120;
+
 function animate() {
   requestAnimationFrame(animate);
-  
+
+  // 归一化帧时间（60fps 为基准 1.0），并限制突增（首帧/标签页恢复）| Normalize frame time (60fps baseline = 1.0), clamped against spikes (first frame / tab resume)
+  const dt = Math.min(clock.getDelta() * 60, 3);
+
   // 太阳自转 | Sun Rotation
-  sun.rotation.y += 0.001;
-  
+  sun.rotation.y += 0.001 * dt;
+
   // Animate sun shader
   if (sun.material.uniforms && sun.material.uniforms.time) {
-    sun.material.uniforms.time.value += 0.01;
+    sun.material.uniforms.time.value += 0.01 * dt;
   }
-  
+
   // 行星运动 | Planet Movement
   planets.forEach(planet => {
     const data = planet.userData;
-    
+
     // 公转 | Revolution
     const orbitalSpeed = (2 * Math.PI) / (data.orbitalPeriod * 0.01) * (speed * 0.1);
-    data.angle += orbitalSpeed * 0.01;
-    
+    data.angle += orbitalSpeed * 0.01 * dt;
+
     planet.position.x = Math.cos(data.angle) * data.scaledDistance;
     planet.position.z = Math.sin(data.angle) * data.scaledDistance;
-    
+
     // 自转 | Rotation
     const rotationSpeed = (2 * Math.PI) / (data.rotationPeriod * 0.1) * speed;
-    planet.rotation.y += rotationSpeed * 0.01;
+    planet.rotation.y += rotationSpeed * 0.01 * dt;
   });
-  
+
   // 旅行者号运动 | Voyager Movement
   if (showVoyagers && voyager1 && voyager2) {
-    voyager1.userData.angle += voyager1.userData.speed * speed;
-    voyager1.userData.distance += 0.01 * speed;
+    voyager1.userData.angle += voyager1.userData.speed * speed * dt;
+    voyager1.userData.distance += 0.01 * speed * dt;
+    if (voyager1.userData.distance > VOYAGER_MAX_DISTANCE) {
+      voyager1.userData.distance = 5;
+    }
     voyager1.position.x = Math.cos(voyager1.userData.angle) * voyager1.userData.distance;
     voyager1.position.z = Math.sin(voyager1.userData.angle) * voyager1.userData.distance;
-    
-    voyager2.userData.angle += voyager2.userData.speed * speed;
-    voyager2.userData.distance += 0.01 * speed;
+
+    voyager2.userData.angle += voyager2.userData.speed * speed * dt;
+    voyager2.userData.distance += 0.01 * speed * dt;
+    if (voyager2.userData.distance > VOYAGER_MAX_DISTANCE) {
+      voyager2.userData.distance = 7;
+    }
     voyager2.position.x = Math.cos(voyager2.userData.angle) * voyager2.userData.distance;
     voyager2.position.z = Math.sin(voyager2.userData.angle) * voyager2.userData.distance;
   }
-  
+
   // 月球运动 | Moon Movement
   if (moon) {
     const earth = planets.find(p => p.userData.nameCN === '地球');
     if (earth) {
-      moon.userData.angle += (2 * Math.PI) / (moon.userData.orbitalPeriod * 0.1) * (speed * 0.1);
+      moon.userData.angle += (2 * Math.PI) / (moon.userData.orbitalPeriod * 0.1) * (speed * 0.1) * dt;
       const moonX = earth.position.x + Math.cos(moon.userData.angle) * moon.userData.distance;
       const moonZ = earth.position.z + Math.sin(moon.userData.angle) * moon.userData.distance;
       moon.position.set(moonX, earth.position.y, moonZ);
     }
   }
-  
+
   controls.update();
   renderer.render(scene, camera);
 }

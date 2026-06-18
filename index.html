@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>太阳系 3D 可视化 - Solar System 3D</title>
   <style>
     * {
@@ -20,11 +20,12 @@
     #canvas-container {
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
     }
-    
+
     #ui {
       position: fixed;
-      top: 20px;
+      top: max(20px, env(safe-area-inset-top));
       left: 50%;
       transform: translateX(-50%);
       color: white;
@@ -46,7 +47,7 @@
     
     #planet-list {
     position: absolute;
-    left: 20px;
+    left: max(20px, env(safe-area-inset-left));
     top: 50%;
     transform: translateY(-50%);
     background: rgba(10, 10, 20, 0.9);
@@ -164,16 +165,97 @@
   
   #controls {
       position: fixed;
-      bottom: 60px;
-      right: 20px;
+      bottom: max(60px, calc(40px + env(safe-area-inset-bottom)));
+      right: max(20px, env(safe-area-inset-right));
       color: white;
       z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 300px;
+      background: rgba(10, 10, 20, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 8px;
+      backdrop-filter: blur(8px);
+    }
+
+    .toolbar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .toolbar-title {
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      opacity: 0.7;
+      white-space: nowrap;
+    }
+
+    .toolbar-header-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    #controls button.toolbar-icon-btn {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      font-size: 16px;
+      line-height: 1;
+      border-radius: 6px;
+    }
+
+    @media (pointer: coarse) {
+      #controls button.toolbar-icon-btn {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    .toolbar-body {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 8px;
-      max-width: 300px;
     }
-    
+
+    #controls.minimized .toolbar-body {
+      display: none;
+    }
+
+    #controls.closed {
+      display: none;
+    }
+
+    .toolbar-reopen {
+      position: fixed;
+      bottom: max(60px, calc(40px + env(safe-area-inset-bottom)));
+      right: max(20px, env(safe-area-inset-right));
+      z-index: 100;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toolbar-reopen:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    .toolbar-reopen[hidden] {
+      display: none;
+    }
+
     #controls button {
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.3);
@@ -183,12 +265,13 @@
       font-size: 11px;
       transition: all 0.3s;
       white-space: nowrap;
+      min-width: 0;
     }
-    
+
     #controls button:hover {
       background: rgba(255,255,255,0.2);
     }
-    
+
     #controls button.active {
       background: rgba(100, 150, 255, 0.3);
       border-color: rgba(100, 150, 255, 0.5);
@@ -197,8 +280,8 @@
     
     #planet-info {
       position: fixed;
-      top: 20px;
-      right: 20px;
+      top: max(20px, env(safe-area-inset-top));
+      right: max(20px, env(safe-area-inset-right));
       background: rgba(0,0,0,0.8);
       color: white;
       padding: 20px;
@@ -262,8 +345,8 @@
     
     #speed-control {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: max(20px, env(safe-area-inset-bottom));
+      right: max(20px, env(safe-area-inset-right));
       color: white;
       z-index: 100;
     }
@@ -290,52 +373,64 @@
       #planet-list {
         width: 80px;
         padding: 15px 10px;
-        left: 10px;
+        left: max(10px, env(safe-area-inset-left));
       }
-      
+
       .planet-item {
         padding: 6px 8px;
       }
-      
+
       .planet-indicator {
         width: 10px;
         height: 10px;
       }
-      
+
       .planet-label {
         font-size: 9px;
         letter-spacing: 0.5px;
       }
-      
+
       #controls {
-        bottom: 50px;
-        right: 10px;
-        max-width: 200px;
+        bottom: max(50px, calc(30px + env(safe-area-inset-bottom)));
+        right: max(10px, env(safe-area-inset-right));
+        max-width: min(220px, calc(100vw - 20px));
         gap: 5px;
       }
-      
+
+      .toolbar-body {
+        grid-template-columns: 1fr;
+      }
+
       #controls button {
         padding: 6px 8px;
         font-size: 10px;
+        white-space: normal;
       }
-      
+
+      .toolbar-reopen {
+        bottom: max(50px, calc(30px + env(safe-area-inset-bottom)));
+        right: max(10px, env(safe-area-inset-right));
+        width: 40px;
+        height: 40px;
+      }
+
       #speed-control {
-        bottom: 10px;
-        right: 10px;
+        bottom: max(10px, env(safe-area-inset-bottom));
+        right: max(10px, env(safe-area-inset-right));
       }
-      
+
       #speed-control label {
         font-size: 12px;
       }
-      
+
       #speed-control input {
         width: 100px;
       }
-      
+
       #planet-info {
-        top: 10px;
-        right: 10px;
-        left: 10px;
+        top: max(10px, env(safe-area-inset-top));
+        right: max(10px, env(safe-area-inset-right));
+        left: max(10px, env(safe-area-inset-left));
         max-width: none;
         padding: 15px;
         max-height: 80vh;
@@ -364,54 +459,64 @@
   </div>
   
   <div id="planet-list">
-    <div class="planet-item" data-planet="太阳">
+    <div class="planet-item" data-planet="太阳" role="button" tabindex="0">
       <span class="planet-indicator sun"></span>
       <span class="planet-label">太阳</span>
     </div>
-    <div class="planet-item" data-planet="水星">
+    <div class="planet-item" data-planet="水星" role="button" tabindex="0">
       <span class="planet-indicator mercury"></span>
       <span class="planet-label">水星</span>
     </div>
-    <div class="planet-item" data-planet="金星">
+    <div class="planet-item" data-planet="金星" role="button" tabindex="0">
       <span class="planet-indicator venus"></span>
       <span class="planet-label">金星</span>
     </div>
-    <div class="planet-item active" data-planet="地球">
+    <div class="planet-item active" data-planet="地球" role="button" tabindex="0">
       <span class="planet-indicator earth"></span>
       <span class="planet-label">地球</span>
     </div>
-    <div class="planet-item" data-planet="火星">
+    <div class="planet-item" data-planet="火星" role="button" tabindex="0">
       <span class="planet-indicator mars"></span>
       <span class="planet-label">火星</span>
     </div>
-    <div class="planet-item" data-planet="木星">
+    <div class="planet-item" data-planet="木星" role="button" tabindex="0">
       <span class="planet-indicator jupiter"></span>
       <span class="planet-label">木星</span>
     </div>
-    <div class="planet-item" data-planet="土星">
+    <div class="planet-item" data-planet="土星" role="button" tabindex="0">
       <span class="planet-indicator saturn"></span>
       <span class="planet-label">土星</span>
     </div>
-    <div class="planet-item" data-planet="天王星">
+    <div class="planet-item" data-planet="天王星" role="button" tabindex="0">
       <span class="planet-indicator uranus"></span>
       <span class="planet-label">天王星</span>
     </div>
-    <div class="planet-item" data-planet="海王星">
+    <div class="planet-item" data-planet="海王星" role="button" tabindex="0">
       <span class="planet-indicator neptune"></span>
       <span class="planet-label">海王星</span>
     </div>
   </div>
-  
+
   <div id="controls">
-    <button id="grand-tour">🌟 太阳系之旅 | Grand Tour</button>
-    <button id="toggle-orbits">🔄 轨道 | Orbits</button>
-    <button id="toggle-labels">🏷️ 标签 | Labels</button>
-    <button id="toggle-voyagers">🚀 旅行者号 | Voyagers</button>
-    <button id="toggle-eclipse">🌑 日食 | Eclipse</button>
-    <button id="show-transfer">🛤️ 转移轨道 | Transfer</button>
-    <button id="show-launch">🎯 发射 | Launch</button>
-    <button id="toggle-sound">🔊 声音 | Sound</button>
+    <div class="toolbar-header">
+      <span class="toolbar-title">控制面板 | Controls</span>
+      <div class="toolbar-header-actions">
+        <button id="toolbar-minimize" class="toolbar-icon-btn" aria-label="最小化 | Minimize" title="最小化 | Minimize">−</button>
+        <button id="toolbar-close" class="toolbar-icon-btn" aria-label="关闭 | Close" title="关闭 | Close">×</button>
+      </div>
+    </div>
+    <div class="toolbar-body">
+      <button id="grand-tour" aria-pressed="false">🌟 太阳系之旅 | Grand Tour</button>
+      <button id="toggle-orbits" aria-pressed="true">🔄 轨道 | Orbits</button>
+      <button id="toggle-labels" aria-pressed="true">🏷️ 标签 | Labels</button>
+      <button id="toggle-voyagers" aria-pressed="true">🚀 旅行者号 | Voyagers</button>
+      <button id="toggle-eclipse" aria-pressed="false">🌑 日食 | Eclipse</button>
+      <button id="show-transfer" aria-pressed="false">🛤️ 转移轨道 | Transfer</button>
+      <button id="show-launch" aria-pressed="false">🎯 发射 | Launch</button>
+      <button id="toggle-sound" aria-pressed="false">🔊 声音 | Sound</button>
+    </div>
   </div>
+  <button id="controls-reopen" class="toolbar-reopen" aria-label="打开控制面板 | Open controls" title="打开控制面板 | Open controls" hidden>⚙️</button>
   
   <div id="planet-info">
     <button class="close-btn" onclick="hidePlanetInfo()">×</button>
