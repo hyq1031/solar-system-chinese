@@ -44,7 +44,53 @@
       opacity: 0.8;
       margin-bottom: 5px;
     }
-    
+
+    #language-toggle {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
+    #language-toggle:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    body[data-lang="zh"] .lang-en {
+      display: none;
+    }
+
+    body[data-lang="en"] .lang-zh {
+      display: none;
+    }
+
+    #planet-search {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      width: 100%;
+      margin-bottom: 4px;
+    }
+
+    #planet-search::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    #planet-search[hidden] {
+      display: none;
+    }
+
+    .planet-item[hidden] {
+      display: none;
+    }
+
     #planet-list {
     position: absolute;
     left: max(20px, env(safe-area-inset-left));
@@ -138,6 +184,16 @@
   .planet-indicator.neptune {
     background: linear-gradient(135deg, #4b70dd, #3d5cc4);
     box-shadow: 0 0 12px #4b70dd;
+  }
+
+  .planet-indicator.moon {
+    background: linear-gradient(135deg, #d4d4d4, #aaaaaa);
+    box-shadow: 0 0 8px #d4d4d4;
+  }
+
+  .planet-indicator.asteroid-belt {
+    background: linear-gradient(135deg, #9c8b7a, #6e5f50);
+    box-shadow: 0 0 8px #9c8b7a;
   }
   
   .planet-label {
@@ -292,8 +348,32 @@
       border: 1px solid rgba(255, 255, 255, 0.3);
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
     }
-    
-    #planet-info .close-btn {
+
+    #comparison-panel,
+    #bookmarks-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      z-index: 110;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+    }
+
+    #comparison-panel[hidden],
+    #bookmarks-panel[hidden] {
+      display: none;
+    }
+
+    #planet-info .close-btn,
+    #comparison-panel .close-btn,
+    #bookmarks-panel .close-btn {
       position: absolute;
       top: 10px;
       right: 10px;
@@ -308,18 +388,103 @@
       line-height: 1;
       transition: background 0.3s;
     }
-    
-    #planet-info .close-btn:hover {
+
+    #planet-info .close-btn:hover,
+    #comparison-panel .close-btn:hover,
+    #bookmarks-panel .close-btn:hover {
       background: rgba(255, 255, 255, 0.4);
     }
-    
-    #planet-info h2 {
+
+    #planet-info h2,
+    #comparison-panel h2,
+    #bookmarks-panel h2 {
       margin-bottom: 15px;
       font-size: 20px;
       text-align: center;
       border-bottom: 1px solid rgba(255, 255, 255, 0.3);
       padding-bottom: 10px;
       padding-right: 30px;
+    }
+
+    .comparison-selectors {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .comparison-selectors select {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    #comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    #comparison-table th,
+    #comparison-table td {
+      padding: 6px 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    #comparison-table th {
+      color: #ffdd44;
+      width: 30%;
+    }
+
+    #bookmark-save {
+      width: 100%;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    #bookmark-save:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    #bookmark-list {
+      list-style: none;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    #bookmark-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 12px;
+    }
+
+    #bookmark-list button {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    #bookmark-list button:hover {
+      background: rgba(255,255,255,0.2);
     }
     
     #planet-info p {
@@ -359,7 +524,48 @@
     #speed-control input {
       width: 150px;
     }
-    
+
+    /* High Contrast Mode | 高对比度模式 */
+    body.high-contrast #planet-list,
+    body.high-contrast #controls,
+    body.high-contrast #planet-info,
+    body.high-contrast #comparison-panel,
+    body.high-contrast #bookmarks-panel {
+      background: #000;
+      backdrop-filter: none;
+      border-color: #fff;
+      border-width: 2px;
+    }
+
+    body.high-contrast .planet-item.active {
+      background: #000;
+      box-shadow: 0 0 0 2px #fff inset;
+    }
+
+    body.high-contrast #controls button {
+      background: #000;
+      border-color: #fff;
+      border-width: 2px;
+      color: #fff;
+    }
+
+    body.high-contrast #controls button.active {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+
+    body.high-contrast .planet-label,
+    body.high-contrast .toolbar-title {
+      color: #fff;
+      opacity: 1;
+    }
+
+    body.high-contrast #planet-info .planet-details strong {
+      color: #fff;
+      text-decoration: underline;
+    }
+
     /* Mobile Responsive Styles */
     @media (max-width: 768px) {
       #ui h1 {
@@ -456,85 +662,120 @@
   
   <div id="ui">
     <h1>太阳系 3D 可视化</h1>
+    <button id="language-toggle" aria-label="切换语言 | Switch language" title="切换语言 | Switch language">🌐 双语 | Both</button>
   </div>
   
   <div id="planet-list">
-    <div class="planet-item" data-planet="太阳" role="button" tabindex="0">
+    <input type="text" id="planet-search" placeholder="🔍 搜索 | Search..." hidden>
+    <div class="planet-item" data-planet="太阳" data-name-en="Sun" role="button" tabindex="0">
       <span class="planet-indicator sun"></span>
       <span class="planet-label">太阳</span>
     </div>
-    <div class="planet-item" data-planet="水星" role="button" tabindex="0">
+    <div class="planet-item" data-planet="水星" data-name-en="Mercury" role="button" tabindex="0">
       <span class="planet-indicator mercury"></span>
       <span class="planet-label">水星</span>
     </div>
-    <div class="planet-item" data-planet="金星" role="button" tabindex="0">
+    <div class="planet-item" data-planet="金星" data-name-en="Venus" role="button" tabindex="0">
       <span class="planet-indicator venus"></span>
       <span class="planet-label">金星</span>
     </div>
-    <div class="planet-item active" data-planet="地球" role="button" tabindex="0">
+    <div class="planet-item active" data-planet="地球" data-name-en="Earth" role="button" tabindex="0">
       <span class="planet-indicator earth"></span>
       <span class="planet-label">地球</span>
     </div>
-    <div class="planet-item" data-planet="火星" role="button" tabindex="0">
+    <div class="planet-item" data-planet="火星" data-name-en="Mars" role="button" tabindex="0">
       <span class="planet-indicator mars"></span>
       <span class="planet-label">火星</span>
     </div>
-    <div class="planet-item" data-planet="木星" role="button" tabindex="0">
+    <div class="planet-item" data-planet="木星" data-name-en="Jupiter" role="button" tabindex="0">
       <span class="planet-indicator jupiter"></span>
       <span class="planet-label">木星</span>
     </div>
-    <div class="planet-item" data-planet="土星" role="button" tabindex="0">
+    <div class="planet-item" data-planet="土星" data-name-en="Saturn" role="button" tabindex="0">
       <span class="planet-indicator saturn"></span>
       <span class="planet-label">土星</span>
     </div>
-    <div class="planet-item" data-planet="天王星" role="button" tabindex="0">
+    <div class="planet-item" data-planet="天王星" data-name-en="Uranus" role="button" tabindex="0">
       <span class="planet-indicator uranus"></span>
       <span class="planet-label">天王星</span>
     </div>
-    <div class="planet-item" data-planet="海王星" role="button" tabindex="0">
+    <div class="planet-item" data-planet="海王星" data-name-en="Neptune" role="button" tabindex="0">
       <span class="planet-indicator neptune"></span>
       <span class="planet-label">海王星</span>
+    </div>
+    <div class="planet-item" data-planet="月球" data-name-en="Moon" role="button" tabindex="0">
+      <span class="planet-indicator moon"></span>
+      <span class="planet-label">月球</span>
+    </div>
+    <div class="planet-item" data-planet="小行星带" data-name-en="Asteroid Belt" role="button" tabindex="0">
+      <span class="planet-indicator asteroid-belt"></span>
+      <span class="planet-label">小行星带</span>
     </div>
   </div>
 
   <div id="controls">
     <div class="toolbar-header">
-      <span class="toolbar-title">控制面板 | Controls</span>
+      <span class="toolbar-title"><span class="lang-zh">控制面板</span> | <span class="lang-en">Controls</span></span>
       <div class="toolbar-header-actions">
         <button id="toolbar-minimize" class="toolbar-icon-btn" aria-label="最小化 | Minimize" title="最小化 | Minimize">−</button>
         <button id="toolbar-close" class="toolbar-icon-btn" aria-label="关闭 | Close" title="关闭 | Close">×</button>
       </div>
     </div>
     <div class="toolbar-body">
-      <button id="grand-tour" aria-pressed="false">🌟 太阳系之旅 | Grand Tour</button>
-      <button id="toggle-orbits" aria-pressed="true">🔄 轨道 | Orbits</button>
-      <button id="toggle-labels" aria-pressed="true">🏷️ 标签 | Labels</button>
-      <button id="toggle-voyagers" aria-pressed="true">🚀 旅行者号 | Voyagers</button>
-      <button id="toggle-eclipse" aria-pressed="false">🌑 日食 | Eclipse</button>
-      <button id="show-transfer" aria-pressed="false">🛤️ 转移轨道 | Transfer</button>
-      <button id="show-launch" aria-pressed="false">🎯 发射 | Launch</button>
-      <button id="toggle-sound" aria-pressed="false">🔊 声音 | Sound</button>
+      <button id="grand-tour" aria-pressed="false">🌟 <span class="lang-zh">太阳系之旅</span> | <span class="lang-en">Grand Tour</span></button>
+      <button id="toggle-orbits" aria-pressed="true">🔄 <span class="lang-zh">轨道</span> | <span class="lang-en">Orbits</span></button>
+      <button id="toggle-asteroids" aria-pressed="true">🪨 <span class="lang-zh">小行星带</span> | <span class="lang-en">Asteroids</span></button>
+      <button id="toggle-labels" aria-pressed="true">🏷️ <span class="lang-zh">标签</span> | <span class="lang-en">Labels</span></button>
+      <button id="toggle-voyagers" aria-pressed="true">🚀 <span class="lang-zh">旅行者号</span> | <span class="lang-en">Voyagers</span></button>
+      <button id="toggle-eclipse" aria-pressed="false">🌑 <span class="lang-zh">日食</span> | <span class="lang-en">Eclipse</span></button>
+      <button id="show-transfer" aria-pressed="false">🛤️ <span class="lang-zh">转移轨道</span> | <span class="lang-en">Transfer</span></button>
+      <button id="show-launch" aria-pressed="false">🎯 <span class="lang-zh">发射</span> | <span class="lang-en">Launch</span></button>
+      <button id="toggle-sound" aria-pressed="false">🔊 <span class="lang-zh">声音</span> | <span class="lang-en">Sound</span></button>
+      <button id="toggle-contrast" aria-pressed="false">🌓 <span class="lang-zh">高对比度</span> | <span class="lang-en">Contrast</span></button>
+      <button id="toggle-search" aria-pressed="false">🔍 <span class="lang-zh">搜索</span> | <span class="lang-en">Search</span></button>
+      <button id="toggle-compare" aria-pressed="false">⚖️ <span class="lang-zh">比较</span> | <span class="lang-en">Compare</span></button>
+      <button id="toggle-bookmarks" aria-pressed="false">🔖 <span class="lang-zh">收藏</span> | <span class="lang-en">Bookmarks</span></button>
     </div>
   </div>
   <button id="controls-reopen" class="toolbar-reopen" aria-label="打开控制面板 | Open controls" title="打开控制面板 | Open controls" hidden>⚙️</button>
   
-  <div id="planet-info">
+  <div id="planet-info" aria-live="polite">
     <button class="close-btn" onclick="hidePlanetInfo()">×</button>
     <h2 id="planet-name">行星名称</h2>
     <p id="planet-description">描述</p>
     <div class="planet-details">
-      <p><strong>直径 Diameter:</strong> <span id="planet-diameter">-</span></p>
-      <p><strong>年龄 Age:</strong> <span id="planet-age">-</span></p>
-      <p><strong>表面温度 Surface Temp:</strong> <span id="planet-surface-temp">-</span></p>
-      <p><strong>核心温度 Core Temp:</strong> <span id="planet-core-temp">-</span></p>
-      <p><strong>类型 Type:</strong> <span id="planet-type">-</span></p>
-      <p><strong>质量 Mass:</strong> <span id="planet-mass">-</span></p>
-      <p><strong>光到地球 Light to Earth:</strong> <span id="planet-light-to-earth">-</span></p>
+      <p><strong><span class="lang-zh">直径</span> <span class="lang-en">Diameter</span>:</strong> <span id="planet-diameter">-</span></p>
+      <p><strong><span class="lang-zh">年龄</span> <span class="lang-en">Age</span>:</strong> <span id="planet-age">-</span></p>
+      <p><strong><span class="lang-zh">表面温度</span> <span class="lang-en">Surface Temp</span>:</strong> <span id="planet-surface-temp">-</span></p>
+      <p><strong><span class="lang-zh">核心温度</span> <span class="lang-en">Core Temp</span>:</strong> <span id="planet-core-temp">-</span></p>
+      <p><strong><span class="lang-zh">类型</span> <span class="lang-en">Type</span>:</strong> <span id="planet-type">-</span></p>
+      <p><strong><span class="lang-zh">质量</span> <span class="lang-en">Mass</span>:</strong> <span id="planet-mass">-</span></p>
+      <p><strong><span class="lang-zh">光到地球</span> <span class="lang-en">Light to Earth</span>:</strong> <span id="planet-light-to-earth">-</span></p>
+      <p><strong><span class="lang-zh">相对地球大小</span> <span class="lang-en">Size vs Earth</span>:</strong> <span id="planet-size-vs-earth">-</span></p>
+      <p><strong><span class="lang-zh">发现者</span> <span class="lang-en">Discovered By</span>:</strong> <span id="planet-discovered-by">-</span></p>
+      <p><strong><span class="lang-zh">发现时间</span> <span class="lang-en">Discovery Date</span>:</strong> <span id="planet-discovery-date">-</span></p>
     </div>
   </div>
-  
+
+  <div id="comparison-panel" hidden>
+    <button class="close-btn" id="comparison-close">×</button>
+    <h2><span class="lang-zh">天体比较</span> | <span class="lang-en">Body Comparison</span></h2>
+    <div class="comparison-selectors">
+      <select id="compare-select-a"></select>
+      <select id="compare-select-b"></select>
+    </div>
+    <table id="comparison-table"></table>
+  </div>
+
+  <div id="bookmarks-panel" hidden>
+    <button class="close-btn" id="bookmarks-close">×</button>
+    <h2><span class="lang-zh">收藏视图</span> | <span class="lang-en">Bookmarked Views</span></h2>
+    <button id="bookmark-save"><span class="lang-zh">保存当前视图</span> | <span class="lang-en">Save Current View</span></button>
+    <ul id="bookmark-list"></ul>
+  </div>
+
   <div id="speed-control">
-    <label>速度 | Speed:</label>
+    <label><span class="lang-zh">速度</span> | <span class="lang-en">Speed</span>:</label>
     <input type="range" id="speed" min="0.1" max="10" step="0.1" value="1">
   </div>
   

@@ -25,6 +25,11 @@ let showLaunch = false;
 let soundEnabled = false;
 let oscillators = [];
 let moon;
+let asteroidBelt;
+let asteroidBeltCollider;
+let showAsteroidBelt = true;
+let celestialBodies = [];
+let currentLanguage = 'both'; // 'both' | 'zh' | 'en'
 
 // 行星数据 | Planet Data
 // 真实距离比例（天文单位 AU）| True scale distances (AU)
@@ -46,7 +51,10 @@ const planetData = [
     coreTemp: '1,700°C',
     type: 'Terrestrial',
     mass: '3.285 × 10²³ kg',
-    lightToEarth: '3-10 minutes'
+    lightToEarth: '3-10 minutes',
+    discoveredBy: 'Known since antiquity',
+    discoveryDate: 'Prehistoric',
+    sizeVsEarth: "38% of Earth's diameter"
   },
   {
     name: '金星 | Venus',
@@ -65,7 +73,10 @@ const planetData = [
     coreTemp: '5,000°C',
     type: 'Terrestrial',
     mass: '4.867 × 10²⁴ kg',
-    lightToEarth: '2-14 minutes'
+    lightToEarth: '2-14 minutes',
+    discoveredBy: 'Known since antiquity',
+    discoveryDate: 'Prehistoric',
+    sizeVsEarth: "95% of Earth's diameter"
   },
   {
     name: '地球 | Earth',
@@ -84,7 +95,10 @@ const planetData = [
     coreTemp: '5,400°C',
     type: 'Terrestrial',
     mass: '5.972 × 10²⁴ kg',
-    lightToEarth: '0 minutes (home)'
+    lightToEarth: '0 minutes (home)',
+    discoveredBy: 'N/A — our home planet',
+    discoveryDate: 'N/A',
+    sizeVsEarth: 'Baseline (100%)'
   },
   {
     name: '火星 | Mars',
@@ -103,7 +117,10 @@ const planetData = [
     coreTemp: '1,500°C',
     type: 'Terrestrial',
     mass: '6.39 × 10²³ kg',
-    lightToEarth: '3-22 minutes'
+    lightToEarth: '3-22 minutes',
+    discoveredBy: 'Known since antiquity',
+    discoveryDate: 'Prehistoric',
+    sizeVsEarth: "53% of Earth's diameter"
   },
   {
     name: '木星 | Jupiter',
@@ -122,7 +139,10 @@ const planetData = [
     coreTemp: '24,000°C',
     type: 'Gas Giant',
     mass: '1.898 × 10²⁷ kg',
-    lightToEarth: '35-52 minutes'
+    lightToEarth: '35-52 minutes',
+    discoveredBy: 'Known since antiquity',
+    discoveryDate: 'Prehistoric',
+    sizeVsEarth: "11.2x Earth's diameter"
   },
   {
     name: '土星 | Saturn',
@@ -141,7 +161,10 @@ const planetData = [
     coreTemp: '11,700°C',
     type: 'Gas Giant',
     mass: '5.683 × 10²⁶ kg',
-    lightToEarth: '65-80 minutes'
+    lightToEarth: '65-80 minutes',
+    discoveredBy: 'Known since antiquity',
+    discoveryDate: 'Prehistoric',
+    sizeVsEarth: "9.4x Earth's diameter"
   },
   {
     name: '天王星 | Uranus',
@@ -160,7 +183,10 @@ const planetData = [
     coreTemp: '5,000°C',
     type: 'Ice Giant',
     mass: '8.681 × 10²⁵ kg',
-    lightToEarth: '2.5-2.7 hours'
+    lightToEarth: '2.5-2.7 hours',
+    discoveredBy: 'William Herschel',
+    discoveryDate: '1781',
+    sizeVsEarth: "4.0x Earth's diameter"
   },
   {
     name: '海王星 | Neptune',
@@ -179,7 +205,10 @@ const planetData = [
     coreTemp: '5,400°C',
     type: 'Ice Giant',
     mass: '1.024 × 10²⁶ kg',
-    lightToEarth: '4.0-4.2 hours'
+    lightToEarth: '4.0-4.2 hours',
+    discoveredBy: 'Urbain Le Verrier & Johann Galle',
+    discoveryDate: '1846',
+    sizeVsEarth: "3.9x Earth's diameter"
   }
 ];
 
@@ -237,7 +266,13 @@ function init() {
   
   // 创建月球 | Create Moon
   createMoon();
-  
+
+  // 创建小行星带 | Create Asteroid Belt
+  createAsteroidBelt();
+
+  // 可点击天体注册表 | Unified clickable-body registry (sidebar lookup + raycasting)
+  celestialBodies = [sun, ...planets, moon, asteroidBeltCollider];
+
   // 事件监听 | Event Listeners
   window.addEventListener('resize', onWindowResize);
   renderer.domElement.addEventListener('click', onMouseClick);
@@ -249,70 +284,210 @@ function init() {
   animate();
 }
 
+function clampChannel(value) {
+  return Math.min(255, Math.max(0, value));
+}
+
+function hexToRgba(hex, alpha) {
+  const c = new THREE.Color(hex);
+  return `rgba(${c.r * 255}, ${c.g * 255}, ${c.b * 255}, ${alpha})`;
+}
+
+// 柔和有机噪点 | Soft organic noise blobs (replaces uniform speckle dots)
+function drawSurfaceNoise(ctx, color) {
+  for (let i = 0; i < 300; i++) {
+    const x = Math.random() * 512;
+    const y = Math.random() * 256;
+    const radius = 15 + Math.random() * 35;
+    const variation = (Math.random() - 0.5) * 0.18;
+    const r = clampChannel(color.r * 255 + variation * 255);
+    const g = clampChannel(color.g * 255 + variation * 255);
+    const b = clampChannel(color.b * 255 + variation * 255);
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.25)`);
+    gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+  }
+}
+
+// 陨石坑（岩质行星/月球）| Craters for rocky bodies
+function drawCraters(ctx, color, count) {
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * 512;
+    const y = Math.random() * 256;
+    const radius = 4 + Math.random() * 14;
+
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(x - radius * 0.15, y - radius * 0.15, radius * 0.65, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${clampChannel(color.r * 255 + 25)}, ${clampChannel(color.g * 255 + 25)}, ${clampChannel(color.b * 255 + 25)}, 0.3)`;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+// 极地冰盖 | Polar ice caps (canvas top/bottom map to the poles)
+function drawPolarCaps(ctx, coverage) {
+  const capHeight = 256 * coverage * 0.5;
+
+  const top = ctx.createLinearGradient(0, 0, 0, capHeight);
+  top.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+  top.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = top;
+  ctx.fillRect(0, 0, 512, capHeight);
+
+  const bottom = ctx.createLinearGradient(0, 256 - capHeight, 0, 256);
+  bottom.addColorStop(0, 'rgba(255, 255, 255, 0)');
+  bottom.addColorStop(1, 'rgba(255, 255, 255, 0.9)');
+  ctx.fillStyle = bottom;
+  ctx.fillRect(0, 256 - capHeight, 512, capHeight);
+}
+
+// 大陆（地球，有机斑点簇而非硬边矩形）| Earth continents as organic blob clusters
+function drawContinents(ctx) {
+  ctx.fillStyle = '#2e8b3e';
+  for (let c = 0; c < 6; c++) {
+    const cx = Math.random() * 512;
+    const cy = 40 + Math.random() * 176;
+    const blobCount = 5 + Math.floor(Math.random() * 4);
+    ctx.beginPath();
+    for (let b = 0; b < blobCount; b++) {
+      const bx = cx + (Math.random() - 0.5) * 90;
+      const by = cy + (Math.random() - 0.5) * 60;
+      const r = 15 + Math.random() * 25;
+      ctx.moveTo(bx + r, by);
+      ctx.arc(bx, by, r, 0, Math.PI * 2);
+    }
+    ctx.fill();
+  }
+}
+
+// 云层（地球，柔和光晕而非硬边矩形）| Earth clouds as soft glows
+function drawClouds(ctx) {
+  for (let i = 0; i < 25; i++) {
+    const x = Math.random() * 512;
+    const y = Math.random() * 256;
+    const r = 10 + Math.random() * 20;
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, r);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+}
+
+// 金星云层旋涡 | Venus's swirling cloud bands
+function drawCloudSwirls(ctx) {
+  for (let i = 0; i < 8; i++) {
+    const y = Math.random() * 256;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 8 + Math.random() * 10;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    for (let x = 0; x <= 512; x += 32) {
+      ctx.lineTo(x, y + Math.sin(x * 0.02 + i) * 20);
+    }
+    ctx.stroke();
+  }
+}
+
+// 湍流条带（气态/冰巨星）| Turbulent wavy bands for gas/ice giants
+function drawBands(ctx, color, bandCount, waviness) {
+  const bandHeight = 256 / bandCount;
+  for (let i = 0; i < bandCount; i++) {
+    const variation = (Math.random() - 0.5) * 0.25;
+    const r = clampChannel(color.r * 255 + variation * 255);
+    const g = clampChannel(color.g * 255 + variation * 255);
+    const b = clampChannel(color.b * 255 + variation * 255);
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.45)`;
+
+    const baseY = i * bandHeight;
+    ctx.beginPath();
+    ctx.moveTo(0, baseY);
+    for (let x = 0; x <= 512; x += 16) {
+      ctx.lineTo(x, baseY + Math.sin(x * 0.05 + i) * waviness);
+    }
+    for (let x = 512; x >= 0; x -= 16) {
+      ctx.lineTo(x, baseY + bandHeight + Math.sin(x * 0.05 + i) * waviness);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+// 风暴（木星大红斑、海王星暗斑）| Storm spot (Jupiter's Great Red Spot, Neptune's dark spot)
+function drawStorm(ctx, x, y, radiusX, radiusY, colorHex, opacity) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(radiusX / radiusY, 1);
+  const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radiusY);
+  gradient.addColorStop(0, hexToRgba(colorHex, opacity));
+  gradient.addColorStop(1, hexToRgba(colorHex, 0));
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(0, 0, radiusY, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
 function createProceduralTexture(baseColor, planetName) {
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 256;
   const ctx = canvas.getContext('2d');
-  
+
   // 基础颜色 | Base Color
   const color = new THREE.Color(baseColor);
   ctx.fillStyle = `rgb(${color.r * 255}, ${color.g * 255}, ${color.b * 255})`;
   ctx.fillRect(0, 0, 512, 256);
-  
-  // 添加纹理细节 | Add Texture Details
-  for (let i = 0; i < 1000; i++) {
-    const x = Math.random() * 512;
-    const y = Math.random() * 256;
-    const radius = Math.random() * 3;
-    
-    const variation = (Math.random() - 0.5) * 0.3;
-    const r = Math.min(255, Math.max(0, color.r * 255 + variation * 255));
-    const g = Math.min(255, Math.max(0, color.g * 255 + variation * 255));
-    const b = Math.min(255, Math.max(0, color.b * 255 + variation * 255));
-    
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.5)`;
-    ctx.fill();
+
+  drawSurfaceNoise(ctx, color);
+
+  const planetType = (planetData.find(p => p.nameCN === planetName) || {}).type;
+
+  if (planetType === 'Gas Giant') {
+    drawBands(ctx, color, 14, 6);
+  } else if (planetType === 'Ice Giant') {
+    drawBands(ctx, color, 6, 2);
   }
-  
-  // 地球特殊处理 | Earth Special Treatment
-  if (planetName === '地球') {
-    // 添加大陆 | Add Continents
-    ctx.fillStyle = '#228B22';
-    for (let i = 0; i < 5; i++) {
-      const x = Math.random() * 512;
-      const y = Math.random() * 256;
-      const w = Math.random() * 100 + 50;
-      const h = Math.random() * 50 + 30;
-      ctx.fillRect(x, y, w, h);
-    }
-    
-    // 添加云层 | Add Clouds
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-    for (let i = 0; i < 20; i++) {
-      const x = Math.random() * 512;
-      const y = Math.random() * 256;
-      const w = Math.random() * 80 + 40;
-      const h = Math.random() * 20 + 10;
-      ctx.fillRect(x, y, w, h);
-    }
-  }
-  
-  // 木星条纹 | Jupiter Stripes
+
   if (planetName === '木星') {
-    for (let i = 0; i < 10; i++) {
-      const y = i * 26;
-      const variation = (Math.random() - 0.5) * 0.2;
-      const r = Math.min(255, Math.max(0, color.r * 255 + variation * 255));
-      const g = Math.min(255, Math.max(0, color.g * 255 + variation * 255));
-      const b = Math.min(255, Math.max(0, color.b * 255 + variation * 255));
-      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.5)`;
-      ctx.fillRect(0, y, 512, 26);
-    }
+    drawStorm(ctx, 360, 150, 38, 22, '#c1440e', 0.6);
   }
-  
+
+  if (planetName === '海王星') {
+    drawStorm(ctx, 150, 90, 16, 12, '#1a2a6c', 0.5);
+  }
+
+  if (planetName === '地球') {
+    drawContinents(ctx);
+    drawClouds(ctx);
+    drawPolarCaps(ctx, 0.35);
+  }
+
+  if (planetName === '火星') {
+    drawCraters(ctx, color, 18);
+    drawPolarCaps(ctx, 0.22);
+  }
+
+  if (planetName === '金星') {
+    drawCloudSwirls(ctx);
+  }
+
+  if (planetName === '水星' || planetName === '月球') {
+    drawCraters(ctx, color, planetName === '月球' ? 35 : 45);
+  }
+
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
@@ -383,7 +558,10 @@ function createSun() {
     coreTemp: '15 million °C',
     type: 'G-type Main Sequence Star',
     mass: '1.989 × 10³⁰ kg',
-    lightToEarth: '8 minutes 20 seconds'
+    lightToEarth: '8 minutes 20 seconds',
+    discoveredBy: 'N/A — known since antiquity',
+    discoveryDate: 'N/A',
+    sizeVsEarth: "109x Earth's diameter"
   };
   scene.add(sun);
   
@@ -687,8 +865,9 @@ function createStars() {
 
 function createMoon() {
   const moonGeometry = new THREE.SphereGeometry(0.15, 32, 32);
+  const moonTexture = createProceduralTexture(0xaaaaaa, '月球');
   const moonMaterial = new THREE.MeshStandardMaterial({
-    color: 0xaaaaaa,
+    map: moonTexture,
     roughness: 0.9,
     metalness: 0.1
   });
@@ -696,11 +875,92 @@ function createMoon() {
   moon.castShadow = false;
   moon.receiveShadow = false;
   moon.userData = {
+    name: '月球 | Moon',
+    nameCN: '月球',
+    nameEN: 'Moon',
+    description: '月球是地球唯一的天然卫星，也是太阳系中第五大卫星。',
+    descriptionEN: "The Moon is Earth's only natural satellite and the fifth largest moon in the Solar System.",
+    diameter: '3,474 km',
+    age: '4.5 billion years',
+    surfaceTemp: '-153°C to 107°C',
+    coreTemp: '~1,400°C',
+    type: 'Natural Satellite',
+    mass: '7.342 × 10²² kg',
+    lightToEarth: '1.3 seconds',
+    discoveredBy: 'Known since prehistory',
+    discoveryDate: 'Prehistoric',
+    sizeVsEarth: "27% of Earth's diameter",
     angle: 0,
     distance: 1.5,
     orbitalPeriod: 27.3
   };
+
+  // 月球点击检测球体 | Moon click detection sphere (invisible but larger, matches planet pattern)
+  const clickGeometry = new THREE.SphereGeometry(0.3, 32, 32);
+  const clickMaterial = new THREE.MeshBasicMaterial({
+    transparent: true,
+    opacity: 0,
+    side: THREE.DoubleSide
+  });
+  const clickSphere = new THREE.Mesh(clickGeometry, clickMaterial);
+  clickSphere.userData = moon.userData;
+  moon.add(clickSphere);
+
   scene.add(moon);
+}
+
+const ASTEROID_BELT_INNER_RADIUS = 6;
+const ASTEROID_BELT_OUTER_RADIUS = 8.5;
+
+function createAsteroidBelt() {
+  // 小行星视觉效果 | Visual asteroid particles between Mars and Jupiter
+  const beltGeometry = new THREE.BufferGeometry();
+  const beltMaterial = new THREE.PointsMaterial({
+    color: 0x9c8b7a,
+    size: 0.08
+  });
+
+  const beltVertices = [];
+  for (let i = 0; i < 2000; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = ASTEROID_BELT_INNER_RADIUS + Math.random() * (ASTEROID_BELT_OUTER_RADIUS - ASTEROID_BELT_INNER_RADIUS);
+    const x = Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    const y = (Math.random() - 0.5) * 0.4;
+    beltVertices.push(x, y, z);
+  }
+
+  beltGeometry.setAttribute('position', new THREE.Float32BufferAttribute(beltVertices, 3));
+  asteroidBelt = new THREE.Points(beltGeometry, beltMaterial);
+  asteroidBelt.visible = showAsteroidBelt;
+  scene.add(asteroidBelt);
+
+  // 点击检测环（不可见）| Invisible click-detection torus carrying the belt's info
+  const colliderGeometry = new THREE.TorusGeometry(
+    (ASTEROID_BELT_INNER_RADIUS + ASTEROID_BELT_OUTER_RADIUS) / 2,
+    (ASTEROID_BELT_OUTER_RADIUS - ASTEROID_BELT_INNER_RADIUS) / 2,
+    8,
+    64
+  );
+  const colliderMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+  asteroidBeltCollider = new THREE.Mesh(colliderGeometry, colliderMaterial);
+  asteroidBeltCollider.rotation.x = Math.PI / 2;
+  asteroidBeltCollider.visible = showAsteroidBelt;
+  asteroidBeltCollider.userData = {
+    name: '小行星带 | Asteroid Belt',
+    nameCN: '小行星带',
+    nameEN: 'Asteroid Belt',
+    description: '小行星带位于火星和木星之间，包含数百万颗岩石小行星，谷神星是其中最大的天体。',
+    descriptionEN: 'The asteroid belt lies between Mars and Jupiter and contains millions of rocky asteroids; Ceres is the largest object within it.',
+    type: 'Asteroid Belt (rocky bodies)',
+    age: '4.6 billion years',
+    mass: '~3 × 10²¹ kg (combined, ~4% of the Moon\'s mass)',
+    lightToEarth: '10-18 minutes',
+    discoveredBy: 'Ceres (largest member) found by Giuseppe Piazzi',
+    discoveryDate: '1801',
+    sizeVsEarth: 'N/A — diffuse belt, not a single body'
+  };
+  scene.add(asteroidBeltCollider);
 }
 
 function onWindowResize() {
@@ -716,25 +976,18 @@ function onMouseClick(event) {
   
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, camera);
-  
-  // Check if sun is clicked
-  const sunIntersects = raycaster.intersectObject(sun, true);
-  if (sunIntersects.length > 0) {
-    showPlanetInfo(sun.userData);
-    return;
-  }
-  
-  const intersects = raycaster.intersectObjects(planets, true);
+
+  const intersects = raycaster.intersectObjects(celestialBodies, true);
 
   if (intersects.length > 0) {
-    // Find the parent planet (might hit a child like label or ring)
-    let planet = intersects[0].object;
-    while (planet.parent && !planet.userData.nameCN) {
-      planet = planet.parent;
+    // Find the parent body (might hit a child like label, ring, or click sphere)
+    let body = intersects[0].object;
+    while (body.parent && !body.userData.nameCN) {
+      body = body.parent;
     }
 
-    if (planet.userData.nameCN) {
-      showPlanetInfo(planet.userData);
+    if (body.userData.nameCN) {
+      showPlanetInfo(body.userData);
     }
   } else {
     hidePlanetInfo();
@@ -743,8 +996,23 @@ function onMouseClick(event) {
 
 function showPlanetInfo(data) {
   const infoPanel = document.getElementById('planet-info');
-  document.getElementById('planet-name').textContent = data.name;
-  document.getElementById('planet-description').textContent = data.description;
+  // Show the panel before writing new content so screen readers reliably
+  // announce the update via aria-live (content changes while hidden are not
+  // always announced).
+  infoPanel.style.display = 'block';
+
+  const nameEl = document.getElementById('planet-name');
+  nameEl.dataset.nameCn = data.nameCN || '';
+  if (currentLanguage === 'en') {
+    nameEl.textContent = data.nameEN || data.name;
+    document.getElementById('planet-description').textContent = data.descriptionEN || data.description;
+  } else if (currentLanguage === 'zh') {
+    nameEl.textContent = data.nameCN || data.name;
+    document.getElementById('planet-description').textContent = data.description;
+  } else {
+    nameEl.textContent = data.name;
+    document.getElementById('planet-description').textContent = data.description;
+  }
   document.getElementById('planet-diameter').textContent = data.diameter || '-';
   document.getElementById('planet-age').textContent = data.age || '-';
   document.getElementById('planet-surface-temp').textContent = data.surfaceTemp || '-';
@@ -752,7 +1020,9 @@ function showPlanetInfo(data) {
   document.getElementById('planet-type').textContent = data.type || '-';
   document.getElementById('planet-mass').textContent = data.mass || '-';
   document.getElementById('planet-light-to-earth').textContent = data.lightToEarth || '-';
-  infoPanel.style.display = 'block';
+  document.getElementById('planet-size-vs-earth').textContent = data.sizeVsEarth || '-';
+  document.getElementById('planet-discovered-by').textContent = data.discoveredBy || '-';
+  document.getElementById('planet-discovery-date').textContent = data.discoveryDate || '-';
 }
 
 function hidePlanetInfo() {
@@ -765,7 +1035,22 @@ function setupControls() {
   document.getElementById('speed').addEventListener('input', (e) => {
     speed = parseFloat(e.target.value);
   });
-  
+
+  // 语言切换 | Language Toggle
+  const languageLabels = { both: '🌐 双语 | Both', zh: '🌐 中文', en: '🌐 English' };
+  const languageOrder = ['both', 'zh', 'en'];
+  document.getElementById('language-toggle').addEventListener('click', function() {
+    currentLanguage = languageOrder[(languageOrder.indexOf(currentLanguage) + 1) % languageOrder.length];
+    document.body.dataset.lang = currentLanguage;
+    this.textContent = languageLabels[currentLanguage];
+    // Re-render the info panel in the new language if it's currently showing a body.
+    if (document.getElementById('planet-info').style.display === 'block') {
+      const activeName = document.getElementById('planet-name').dataset.nameCn;
+      const activeBody = activeName && celestialBodies.find(b => b.userData.nameCN === activeName);
+      if (activeBody) showPlanetInfo(activeBody.userData);
+    }
+  });
+
   // 太阳系之旅 | Grand Tour
   document.getElementById('grand-tour').addEventListener('click', function() {
     grandTourMode = !grandTourMode;
@@ -806,6 +1091,15 @@ function setupControls() {
     orbits.forEach(orbit => {
       orbit.visible = showOrbits;
     });
+  });
+
+  // 小行星带切换 | Toggle Asteroid Belt
+  document.getElementById('toggle-asteroids').addEventListener('click', function() {
+    showAsteroidBelt = !showAsteroidBelt;
+    this.classList.toggle('active', showAsteroidBelt);
+    this.setAttribute('aria-pressed', String(showAsteroidBelt));
+    if (asteroidBelt) asteroidBelt.visible = showAsteroidBelt;
+    if (asteroidBeltCollider) asteroidBeltCollider.visible = showAsteroidBelt;
   });
 
   // 标签切换 | Toggle Labels
@@ -865,6 +1159,13 @@ function setupControls() {
     this.setAttribute('aria-pressed', String(soundEnabled));
   });
 
+  // 高对比度切换 | Toggle High Contrast
+  document.getElementById('toggle-contrast').addEventListener('click', function() {
+    const highContrast = document.body.classList.toggle('high-contrast');
+    this.classList.toggle('active', highContrast);
+    this.setAttribute('aria-pressed', String(highContrast));
+  });
+
   // 行星列表点击 | Planet List Click
   function selectPlanetItem(item) {
     const planetName = item.getAttribute('data-planet');
@@ -884,12 +1185,224 @@ function setupControls() {
       }
     });
   });
-  
+
+  // 搜索切换 | Toggle Search
+  const searchInput = document.getElementById('planet-search');
+  document.getElementById('toggle-search').addEventListener('click', function() {
+    const showing = searchInput.hasAttribute('hidden');
+    searchInput.toggleAttribute('hidden', !showing);
+    this.classList.toggle('active', showing);
+    this.setAttribute('aria-pressed', String(showing));
+    if (showing) {
+      searchInput.focus();
+    } else {
+      searchInput.value = '';
+      document.querySelectorAll('.planet-item').forEach(pi => pi.removeAttribute('hidden'));
+    }
+  });
+
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    document.querySelectorAll('.planet-item').forEach(item => {
+      const nameCN = item.getAttribute('data-planet') || '';
+      const nameEN = (item.getAttribute('data-name-en') || '').toLowerCase();
+      const matches = !query || nameCN.includes(query) || nameEN.includes(query);
+      item.toggleAttribute('hidden', !matches);
+    });
+  });
+
+  searchInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      const firstMatch = document.querySelector('.planet-item:not([hidden])');
+      if (firstMatch) selectPlanetItem(firstMatch);
+    } else if (event.key === 'Escape') {
+      searchInput.value = '';
+      document.querySelectorAll('.planet-item').forEach(pi => pi.removeAttribute('hidden'));
+    }
+  });
+
   // 环境音 | Ambient Sound
   document.getElementById('ui').addEventListener('click', initAudio, { once: true });
 
   // 控制面板折叠 | Toolbar collapse/close/auto-expand
   setupToolbarCollapse();
+
+  // 比较视图 | Comparison view
+  setupComparisonView();
+
+  // 收藏视图 | Bookmarked views
+  setupBookmarks();
+}
+
+function setupComparisonView() {
+  const panel = document.getElementById('comparison-panel');
+  const selectA = document.getElementById('compare-select-a');
+  const selectB = document.getElementById('compare-select-b');
+  const table = document.getElementById('comparison-table');
+  let populated = false;
+
+  function populateSelectors() {
+    celestialBodies.forEach(body => {
+      const data = body.userData;
+      [selectA, selectB].forEach(select => {
+        const option = document.createElement('option');
+        option.value = data.nameCN;
+        option.textContent = data.name;
+        select.appendChild(option);
+      });
+    });
+    selectA.selectedIndex = 0;
+    selectB.selectedIndex = Math.min(3, celestialBodies.length - 1);
+    populated = true;
+  }
+
+  const rows = [
+    ['diameter', '直径 | Diameter'],
+    ['mass', '质量 | Mass'],
+    ['type', '类型 | Type'],
+    ['age', '年龄 | Age'],
+    ['surfaceTemp', '表面温度 | Surface Temp'],
+    ['sizeVsEarth', '相对地球大小 | Size vs Earth'],
+    ['lightToEarth', '光到地球 | Light to Earth']
+  ];
+
+  function renderComparison() {
+    const dataA = celestialBodies.find(b => b.userData.nameCN === selectA.value);
+    const dataB = celestialBodies.find(b => b.userData.nameCN === selectB.value);
+    if (!dataA || !dataB) return;
+
+    const headerRow = `<tr><th></th><th>${dataA.userData.name}</th><th>${dataB.userData.name}</th></tr>`;
+    const bodyRows = rows.map(([key, label]) => `
+      <tr><th>${label}</th><td>${dataA.userData[key] || '-'}</td><td>${dataB.userData[key] || '-'}</td></tr>
+    `).join('');
+    table.innerHTML = headerRow + bodyRows;
+  }
+
+  selectA.addEventListener('change', renderComparison);
+  selectB.addEventListener('change', renderComparison);
+
+  document.getElementById('toggle-compare').addEventListener('click', function() {
+    const showing = panel.hasAttribute('hidden');
+    if (showing) {
+      if (!populated) populateSelectors();
+      renderComparison();
+    }
+    panel.toggleAttribute('hidden', !showing);
+    this.classList.toggle('active', showing);
+    this.setAttribute('aria-pressed', String(showing));
+  });
+
+  document.getElementById('comparison-close').addEventListener('click', () => {
+    panel.setAttribute('hidden', '');
+    document.getElementById('toggle-compare').classList.remove('active');
+    document.getElementById('toggle-compare').setAttribute('aria-pressed', 'false');
+  });
+}
+
+const BOOKMARKS_STORAGE_KEY = 'solarSystemBookmarks';
+
+function loadBookmarks() {
+  try {
+    return JSON.parse(localStorage.getItem(BOOKMARKS_STORAGE_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveBookmarks(bookmarks) {
+  localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify(bookmarks));
+}
+
+function animateCameraTo(targetPosition, targetLookAt) {
+  const startPosition = camera.position.clone();
+  const startTarget = controls.target.clone();
+  let progress = 0;
+
+  function step() {
+    progress += 0.05;
+    if (progress >= 1) {
+      camera.position.copy(targetPosition);
+      controls.target.copy(targetLookAt);
+      controls.update();
+      return;
+    }
+
+    camera.position.lerpVectors(startPosition, targetPosition, progress);
+    controls.target.lerpVectors(startTarget, targetLookAt, progress);
+    controls.update();
+    requestAnimationFrame(step);
+  }
+
+  step();
+}
+
+function setupBookmarks() {
+  const panel = document.getElementById('bookmarks-panel');
+  const list = document.getElementById('bookmark-list');
+
+  function renderList() {
+    const bookmarks = loadBookmarks();
+    list.innerHTML = '';
+    bookmarks.forEach((bookmark, index) => {
+      const li = document.createElement('li');
+
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = bookmark.name;
+      li.appendChild(nameSpan);
+
+      const actions = document.createElement('span');
+
+      const goBtn = document.createElement('button');
+      goBtn.textContent = '▶ Go';
+      goBtn.addEventListener('click', () => {
+        animateCameraTo(
+          new THREE.Vector3(bookmark.cameraPosition.x, bookmark.cameraPosition.y, bookmark.cameraPosition.z),
+          new THREE.Vector3(bookmark.cameraTarget.x, bookmark.cameraTarget.y, bookmark.cameraTarget.z)
+        );
+      });
+      actions.appendChild(goBtn);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '🗑';
+      deleteBtn.addEventListener('click', () => {
+        const updated = loadBookmarks();
+        updated.splice(index, 1);
+        saveBookmarks(updated);
+        renderList();
+      });
+      actions.appendChild(deleteBtn);
+
+      li.appendChild(actions);
+      list.appendChild(li);
+    });
+  }
+
+  document.getElementById('bookmark-save').addEventListener('click', () => {
+    const name = prompt('Bookmark name | 收藏名称:');
+    if (!name) return;
+    const bookmarks = loadBookmarks();
+    bookmarks.push({
+      name,
+      cameraPosition: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+      cameraTarget: { x: controls.target.x, y: controls.target.y, z: controls.target.z }
+    });
+    saveBookmarks(bookmarks);
+    renderList();
+  });
+
+  document.getElementById('toggle-bookmarks').addEventListener('click', function() {
+    const showing = panel.hasAttribute('hidden');
+    if (showing) renderList();
+    panel.toggleAttribute('hidden', !showing);
+    this.classList.toggle('active', showing);
+    this.setAttribute('aria-pressed', String(showing));
+  });
+
+  document.getElementById('bookmarks-close').addEventListener('click', () => {
+    panel.setAttribute('hidden', '');
+    document.getElementById('toggle-bookmarks').classList.remove('active');
+    document.getElementById('toggle-bookmarks').setAttribute('aria-pressed', 'false');
+  });
 }
 
 function setupToolbarCollapse() {
@@ -1049,7 +1562,7 @@ function toggleSound() {
 }
 
 function focusOnPlanetByName(planetName) {
-  const planet = planets.find(p => p.userData.nameCN === planetName);
+  const planet = celestialBodies.find(p => p.userData.nameCN === planetName);
   if (planet) {
     const targetPosition = planet.position.clone();
     
