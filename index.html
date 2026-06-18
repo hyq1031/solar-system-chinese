@@ -110,7 +110,21 @@
     gap: 8px;
     backdrop-filter: blur(10px);
   }
-  
+
+  .sidebar-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #planet-list.minimized .sidebar-body {
+    display: none;
+  }
+
+  #planet-list.closed {
+    display: none;
+  }
+
   .planet-item {
     display: flex;
     flex-direction: column;
@@ -256,7 +270,8 @@
       flex-shrink: 0;
     }
 
-    #controls button.toolbar-icon-btn {
+    #controls button.toolbar-icon-btn,
+    #planet-list button.toolbar-icon-btn {
       width: 32px;
       height: 32px;
       padding: 0;
@@ -265,8 +280,21 @@
       border-radius: 6px;
     }
 
+    #planet-list button.toolbar-icon-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #planet-list button.toolbar-icon-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
     @media (pointer: coarse) {
-      #controls button.toolbar-icon-btn {
+      #controls button.toolbar-icon-btn,
+      #planet-list button.toolbar-icon-btn {
         width: 40px;
         height: 40px;
       }
@@ -286,10 +314,9 @@
       display: none;
     }
 
-    .toolbar-reopen {
+    .toolbar-reopen,
+    .sidebar-reopen {
       position: fixed;
-      bottom: max(60px, calc(40px + env(safe-area-inset-bottom)));
-      right: max(20px, env(safe-area-inset-right));
       z-index: 100;
       width: 44px;
       height: 44px;
@@ -304,11 +331,24 @@
       justify-content: center;
     }
 
-    .toolbar-reopen:hover {
+    .toolbar-reopen {
+      bottom: max(60px, calc(40px + env(safe-area-inset-bottom)));
+      right: max(20px, env(safe-area-inset-right));
+    }
+
+    .sidebar-reopen {
+      left: max(20px, env(safe-area-inset-left));
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .toolbar-reopen:hover,
+    .sidebar-reopen:hover {
       background: rgba(255,255,255,0.25);
     }
 
-    .toolbar-reopen[hidden] {
+    .toolbar-reopen[hidden],
+    .sidebar-reopen[hidden] {
       display: none;
     }
 
@@ -582,6 +622,12 @@
         left: max(10px, env(safe-area-inset-left));
       }
 
+      .sidebar-reopen {
+        left: max(10px, env(safe-area-inset-left));
+        width: 40px;
+        height: 40px;
+      }
+
       .planet-item {
         padding: 6px 8px;
       }
@@ -666,6 +712,14 @@
   </div>
   
   <div id="planet-list">
+    <div class="toolbar-header">
+      <span class="toolbar-title"><span class="lang-zh">行星列表</span> | <span class="lang-en">Planets</span></span>
+      <div class="toolbar-header-actions">
+        <button id="sidebar-minimize" class="toolbar-icon-btn" aria-label="最小化 | Minimize" title="最小化 | Minimize">−</button>
+        <button id="sidebar-close" class="toolbar-icon-btn" aria-label="关闭 | Close" title="关闭 | Close">×</button>
+      </div>
+    </div>
+    <div class="sidebar-body">
     <input type="text" id="planet-search" placeholder="🔍 搜索 | Search..." hidden>
     <div class="planet-item" data-planet="太阳" data-name-en="Sun" role="button" tabindex="0">
       <span class="planet-indicator sun"></span>
@@ -711,7 +765,9 @@
       <span class="planet-indicator asteroid-belt"></span>
       <span class="planet-label">小行星带</span>
     </div>
+    </div>
   </div>
+  <button id="sidebar-reopen" class="sidebar-reopen" aria-label="打开行星列表 | Open planet list" title="打开行星列表 | Open planet list" hidden>🪐</button>
 
   <div id="controls">
     <div class="toolbar-header">

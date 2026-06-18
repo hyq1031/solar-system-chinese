@@ -1225,7 +1225,10 @@ function setupControls() {
   document.getElementById('ui').addEventListener('click', initAudio, { once: true });
 
   // 控制面板折叠 | Toolbar collapse/close/auto-expand
-  setupToolbarCollapse();
+  setupPanelCollapse('controls', 'controls-reopen', 'toolbar-minimize', 'toolbar-close');
+
+  // 行星列表折叠 | Sidebar collapse/close/auto-expand
+  setupPanelCollapse('planet-list', 'sidebar-reopen', 'sidebar-minimize', 'sidebar-close');
 
   // 比较视图 | Comparison view
   setupComparisonView();
@@ -1405,11 +1408,11 @@ function setupBookmarks() {
   });
 }
 
-function setupToolbarCollapse() {
-  const panel = document.getElementById('controls');
-  const reopenBtn = document.getElementById('controls-reopen');
-  const minimizeBtn = document.getElementById('toolbar-minimize');
-  const closeBtn = document.getElementById('toolbar-close');
+function setupPanelCollapse(panelId, reopenBtnId, minimizeBtnId, closeBtnId) {
+  const panel = document.getElementById(panelId);
+  const reopenBtn = document.getElementById(reopenBtnId);
+  const minimizeBtn = document.getElementById(minimizeBtnId);
+  const closeBtn = document.getElementById(closeBtnId);
   const supportsHover = window.matchMedia('(hover: hover)').matches;
   let hoverCollapseTimer = null;
   let hoverExpanded = false;
