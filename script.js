@@ -1489,32 +1489,41 @@ function initAudio() {
 function createAmbientSound() {
   if (!audioContext) return;
 
-  // Create multiple oscillators for space ambient sound with smoother frequencies
-  const frequencies = [30, 45, 70, 110, 180];
-  
-  frequencies.forEach((freq, index) => {
+  // 柔和泛音音阶（纯音 + 低通滤波）| Gentle harmonic drone: sine waves tuned to
+  // clean octave/fifth/fourth ratios (no dissonant beating) and rounded off
+  // with a lowpass filter, instead of the previous unrelated frequencies on
+  // a harmonic-rich triangle wave.
+  const frequencies = [55, 82.5, 110, 165, 220];
+  const targetGain = 0.025;
+
+  frequencies.forEach((freq) => {
     const oscillator = audioContext.createOscillator();
+    const filter = audioContext.createBiquadFilter();
     const gainNode = audioContext.createGain();
-    
-    // Use triangle waves for smoother sound
-    oscillator.type = 'triangle';
-    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-    
-    // Add slight frequency drift for more organic sound
-    oscillator.frequency.linearRampToValueAtTime(freq + (Math.random() - 0.5) * 2, audioContext.currentTime + 5);
-    
-    // Lower volume for smoother ambient effect
-    gainNode.gain.setValueAtTime(0.03, audioContext.currentTime);
-    
-    // Add subtle gain modulation
-    gainNode.gain.linearRampToValueAtTime(0.04, audioContext.currentTime + 3);
-    gainNode.gain.linearRampToValueAtTime(0.03, audioContext.currentTime + 6);
-    
-    oscillator.connect(gainNode);
+    const now = audioContext.currentTime;
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(freq, now);
+    // Slow, subtle drift — sine tones make pitch wobble more audible than
+    // triangle did, so this is gentler than the original.
+    oscillator.frequency.linearRampToValueAtTime(freq + (Math.random() - 0.5) * 0.6, now + 8);
+
+    filter.type = 'lowpass';
+    filter.frequency.value = 600;
+
+    // Fade in instead of starting at full volume — avoids the harsh "pop"
+    // the previous version had on every play/stop cycle.
+    gainNode.gain.setValueAtTime(0.0001, now);
+    gainNode.gain.exponentialRampToValueAtTime(targetGain, now + 2);
+    gainNode.gain.linearRampToValueAtTime(targetGain * 1.2, now + 6);
+    gainNode.gain.linearRampToValueAtTime(targetGain, now + 10);
+
+    oscillator.connect(filter);
+    filter.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    
+
     oscillator.start();
-    
+
     oscillators.push({ oscillator, gainNode });
   });
 }
@@ -1522,16 +1531,16 @@ function createAmbientSound() {
 function stopAmbientSound() {
   oscillators.forEach(({ oscillator, gainNode }) => {
     try {
-      // Fade out immediately
+      // Fade out smoothly rather than cutting off abruptly.
       gainNode.gain.setValueAtTime(gainNode.gain.value, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.4);
       setTimeout(() => {
         try {
           oscillator.stop();
         } catch (e) {
           // Oscillator already stopped
         }
-      }, 100);
+      }, 400);
     } catch (e) {
       // Oscillator already disconnected
     }
@@ -1554,9 +1563,14 @@ function toggleSound() {
   soundEnabled = true;
   // iOS Safari creates AudioContext in a suspended state even from within a
   // user gesture, and can re-suspend it after the tab loses focus — resume()
-  // must be called every time, not just once at construction.
+  // must be called every time, not just once at construction. Re-check
+  // soundEnabled after the async resume in case the user toggled off again
+  // before it resolved (otherwise sound starts playing despite the button
+  // showing "off").
   if (audioContext.state === 'suspended') {
-    audioContext.resume().then(createAmbientSound);
+    audioContext.resume().then(() => {
+      if (soundEnabled) createAmbientSound();
+    });
   } else {
     createAmbientSound();
   }
